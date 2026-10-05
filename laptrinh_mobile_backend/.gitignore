@@ -1,0 +1,54 @@
+# 1. Dependency Directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# 2. Environment Variables & Secrets (TUYỆT ĐỐI KHÔNG PUSH)
+.env
+.env.local
+.env.*.local
+*.env
+
+# 3. Container & Database Local Storage (Nếu mount volume thư mục ra ngoài)
+mysql_data/
+*.sqlite
+*.db
+
+# 4. Logs & Debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 5. OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 6. IDE & Editor Configs
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# 7. Testing & Coverage
+coverage/
+.nyc_output/
+
+# 8. Temporary & Cache Files
+.cache/
+.npm/
+tmp/
+temp/
+dist/
+build/

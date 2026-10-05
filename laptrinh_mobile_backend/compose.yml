@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: expressjs_backend
+    restart: always
+    ports:
+      - "5001:5000"
+    environment:
+      TZ: "Asia/Ho_Chi_Minh"
+      PORT: ${PORT}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      # Bắt buộc nếu dùng nodemon trong container để bắt sự kiện thay đổi file qua volume mount
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      # Mount thư mục local vào container để nodemon reload code ngay khi sửa
+      - .:/usr/src/app:z
+      - /usr/src/app/node_modules
+    depends_on:
+      - db
+    networks:
+      - express_network
+
+  db:
+    image: docker.io/library/mysql:8.4.7
+    container_name: expressjs_mysql
+    restart: unless-stopped
+    environment:
+      TZ: "Asia/Ho_Chi_Minh"
+      MYSQL_DATABASE: expressjs
+      MYSQL_ROOT_PASSWORD: root123
+    volumes:
+      - mysql-data:/var/lib/mysql:z
+    ports:
+      - "33066:3306"   # mở port ra host nếu cần connect tool bên ngoài
+    networks:
+      - express_network
+
+# --- PHẦN BỔ SUNG PHPMYADMIN ---
+  phpmyadmin:
+    image: docker.io/library/phpmyadmin:latest
+    container_name: expressjs_phpmyadmin
+    ports:
+      - "8002:80"
+    environment:
+      TZ: "Asia/Ho_Chi_Minh"
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root123
+    depends_on:
+      - db
+    networks:
+      - express_network
+
+volumes:
+  mysql-data:
+
+networks:
+  express_network:
+    driver: bridge
