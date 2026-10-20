@@ -1,6 +1,7 @@
-const express = require('express');
-const mysql = require('mysql2');
-require('dotenv').config();
+import express from 'express';
+import mysql from 'mysql2';
+
+import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,7 +31,7 @@ app.get('/api/health', (req, res) => {
         }
         res.json({
             status: 'Success',
-            message: 'Kết nối MySQL thành công qua Podman network!',
+            message: 'Kết nối MySQL thành công qua Docker/Podman network!',
             currentTime: results[0].currentTime
         });
     });
