@@ -36,8 +36,6 @@ Thumbs.db
 
 # 6. IDE & Editor Configs
 .vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
 .idea/
 *.sublime-project
 *.sublime-workspace
