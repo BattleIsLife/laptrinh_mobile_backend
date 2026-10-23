@@ -8,6 +8,6 @@ docker-compose up -d --build
 docker-compose down
 
 # Mở container khi đã cài xong
-docker-compose down -d
+docker-compose up -d
 
 ```
