@@ -34,6 +34,8 @@ services:
       TZ: "Asia/Ho_Chi_Minh"
       MYSQL_DATABASE: expressjs
       MYSQL_ROOT_PASSWORD: root123
+      LANG: C.UTF_8 # Đảm bảo môi trường container hỗ trợ UTF-8
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - mysql-data:/var/lib/mysql:z
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:Z
