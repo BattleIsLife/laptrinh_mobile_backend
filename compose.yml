@@ -14,6 +14,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
       # Bắt buộc nếu dùng nodemon trong container để bắt sự kiện thay đổi file qua volume mount
       CHOKIDAR_USEPOLLING: "true"
     volumes:
