@@ -14,7 +14,7 @@ router.get('/api/health', async (req, res) => {
             currentTime: results[0].currentTime
         });
     } catch (error) {
-        return res.status(500).json({ status: 'Error', message: err.message });
+        return res.status(500).json({ status: 'Error', message: error.message });
     }
 });
 
