@@ -13,7 +13,11 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME || 'expressjs',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    ssl: {
+        rejectUnauthorized: false // Bắt buộc cho Aiven nếu không truyền CA cert
+    },
+    connectTimeout: 10000 // Tăng thời gian chờ kết nối lên 10s
 });
 
 export default pool;
