@@ -7,6 +7,8 @@ CREATE TABLE users (
                 COMMENT 'Đăng nhập bằng SĐT',
   email         VARCHAR(150) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
+  reset_otp     VARCHAR(10) NULL,
+  reset_otp_expires TIMESTAMP NULL,
   full_name     VARCHAR(100) NOT NULL,
   date_of_birth DATE         DEFAULT NULL,
   occupation    VARCHAR(100) DEFAULT NULL
