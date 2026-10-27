@@ -1,3 +1,5 @@
+## Build container chạy backend
+
 **Lưu ý**: Vui lòng copy thủ công .env.example sang .env rồi mới chạy lệnh `docker-compose`
 
 ```bash
@@ -11,3 +13,5 @@ docker-compose down
 docker-compose up -d
 
 ```
+## Tài liệu API của dự án
+Tài liệu API của repo: [nhấn vào đây để xem](documentation/README.md)
