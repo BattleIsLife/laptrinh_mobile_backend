@@ -86,12 +86,12 @@ export const get_otp = async (req, res) => {
         const otp = generateOTP();
 
         // Tiến hành soạn thư gửi email
-        // send_mail(
-        //     user.email,
-        //     "Mã OTP quên mật khẩu",
-        //     "",
-        //     `Mã OTP 6 chữ số được gửi cho bạn có hiệu lực 5 phút: ${otp}`
-        // );
+        send_mail(
+            user.email,
+            "Mã OTP quên mật khẩu",
+            "",
+            `Mã OTP 6 chữ số được gửi cho bạn có hiệu lực 5 phút: ${otp}`
+        );
 
         // Lấy thời gian hiện tại + 5 phút
         const now = new Date();
