@@ -146,7 +146,7 @@ export const reset_password = async (req, res) => {
         console.log(expire_date.getTime())
         
 
-        if(String(otp).trim() === String(user.reset_otp).trim() || now.getTime() > expire_date.getTime())
+        if(String(otp).trim() !== String(user.reset_otp).trim() || now.getTime() > expire_date.getTime())
             return res.status(400).json({
                         status: "false",
                         message: "OTP của bạn đã hết hạn hoặc không hợp lệ"
