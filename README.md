@@ -1,3 +1,5 @@
+## Build container chạy backend
+
 **Lưu ý**: Vui lòng copy thủ công .env.example sang .env rồi mới chạy lệnh `docker-compose`
 
 ```bash
@@ -11,6 +13,7 @@ docker-compose down
 docker-compose up -d
 
 ```
+<<<<<<< HEAD
 
 ## Hồ sơ cá nhân
 
@@ -42,3 +45,7 @@ Content-Type: application/json
 Các trường có thể cập nhật: `full_name`, `date_of_birth`, `occupation`, `number_of_dependents`, `monthly_income`. Có thể gửi một hoặc nhiều trường; gửi `null` cho `date_of_birth` hoặc `occupation` để xóa giá trị. API trả về hồ sơ đã cập nhật, lỗi dữ liệu với mã `400`, hoặc `404` nếu không tìm thấy người dùng.
 
 > Lưu ý: dự án hiện chưa có xác thực người dùng. Không nên đưa endpoint hồ sơ lên môi trường thật nếu chưa giới hạn quyền truy cập theo người dùng đã đăng nhập.
+=======
+## Tài liệu API của dự án
+Tài liệu API của repo: [nhấn vào đây để xem](documentation/README.md)
+>>>>>>> main
