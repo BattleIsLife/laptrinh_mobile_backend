@@ -6,5 +6,5 @@ const router = Router();
 
 router.use(checkHealthRoute);
 router.use(profileRoute);
-router.use(userRoute);
+
 export default router;
