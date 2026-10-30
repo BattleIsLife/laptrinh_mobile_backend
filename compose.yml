@@ -9,14 +9,10 @@ services:
       - "5001:5000"
     environment:
       TZ: "Asia/Ho_Chi_Minh"
-      PORT: ${PORT}
-      DB_HOST: ${DB_HOST}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      JWT_SECRET: ${JWT_SECRET}
       # Bắt buộc nếu dùng nodemon trong container để bắt sự kiện thay đổi file qua volume mount
       CHOKIDAR_USEPOLLING: "true"
+    env_file:
+      - .env
     volumes:
       # Mount thư mục local vào container để nodemon reload code ngay khi sửa
       - .:/usr/src/app:z
