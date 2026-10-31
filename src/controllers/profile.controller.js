@@ -1,4 +1,4 @@
-import ProfileModel from '../models/profile.model.js';
+import ProfileModel from '../models/user.model.js';
 
 const PROFILE_FIELDS = new Set([
     'full_name',
