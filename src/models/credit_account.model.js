@@ -1,5 +1,13 @@
 import pool from "../config/database.js";
 
+const ACCOUNT_FIELDS = new Set([
+    'account_type',
+    'bank_name',
+    'credit_limit',
+    'current_balance',
+    'opened_date'
+]);
+
 export default class CreditAccountModel {
 
     // Lấy tất cả tài khoản của người dùng
@@ -26,15 +34,21 @@ export default class CreditAccountModel {
     }
 
     // Cập nhật tài khoản tín dụng
-    static async update(id, user_id, account_type, bank_name, credit_limit, current_balance)
+    static async update(id, user_id, changes)
     {
-        const sql = `UPDATE credit_accounts SET account_type = ?,
-                                               bank_name = ?,
-                                               credit_limit = ?,
-                                               current_balance = ?,
-                                         WHERE id = ? AND user_id = ?`;
-        const [rows] = await pool.execute(sql, [account_type, bank_name, credit_limit, current_balance, id, user_id])
-        return rows.affectedRows ?? null;
+        const entries = Object.entries(changes).filter(([field]) => ACCOUNT_FIELDS.has(field));
+        if (entries.length === 0) {
+            throw new Error('Ít nhất một trường là bắt buộc');
+        }
+
+        const setClause = entries.map(([field]) => `${field} = ?`).join(', ');
+        const values = entries.map(([, value]) => value);
+        const [result] = await pool.execute(
+            `UPDATE credit_accounts SET ${setClause} WHERE id = ? AND user_id = ?`,
+            [...values, id, user_id]
+        );
+
+        return result.affectedRows ?? null;
     }
 
     // Đóng tài khoản tín dụng
