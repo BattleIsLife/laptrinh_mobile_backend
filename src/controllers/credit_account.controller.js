@@ -150,6 +150,10 @@ export const openCreditAccount = async (req, res) => {
 export const updateCreditAccount = async (req, res) => {
     const user = await getUser(req, res);
     const { account_id, account_type, bank_name, credit_limit, current_balance } = req.body;
+
+    if(!isValidId(account_id))
+        return res.status(400).json({ status: "false", message: "Id tài khoản không hợp lệ" });
+
     const body = req.body;
     delete body.account_id;
     const validationError = validateChanges(body);
@@ -160,6 +164,29 @@ export const updateCreditAccount = async (req, res) => {
     try {
         const updated = await CreditAccountModel.update(account_id, user.id, body);
         if(!updated || updated === 0)
+            return res.status(400).json({ status: "false", message: "Không tìm thấy tài khoản" });
+        return res.status(200).json({
+            status: "success",
+            message: "Đã cập nhật tài khoản tín dụng thành công"
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({
+            status: "false",
+            message: "Có lỗi xảy ra từ phía máy chủ",
+        });
+    }
+};
+
+// Đóng tài khoản tín dụng
+export const closeCreditAccount = async (req, res) => {
+    const user = await getUser(req, res);
+    const { account_id } = req.body;
+    if(!isValidId(account_id))
+        return res.status(400).json({ status: "false", message: "Id tài khoản không hợp lệ" });
+    try {
+        const closed = await CreditAccountModel.close(account_id, user.id);
+        if(!closed || closed === 0)
             return res.status(400).json({ status: "false", message: "Không tìm thấy tài khoản" });
         return res.status(200).json({
             status: "success",

@@ -52,12 +52,12 @@ export default class CreditAccountModel {
     }
 
     // Đóng tài khoản tín dụng
-    static async close(id, user_id, closed_date)
+    static async close(id, user_id)
     {
-        const sql = `UPDATE credit_accounts SET closed_date = ?,
+        const sql = `UPDATE credit_accounts SET closed_date = NOW(),
                                                status = 'CLOSED'
                                          WHERE id = ? AND user_id = ?`;
-        const [rows] = await pool.execute(sql, [closed_date, id, user_id])
+        const [rows] = await pool.execute(sql, [id, user_id])
         return rows.affectedRows ?? null;
     }
 }
