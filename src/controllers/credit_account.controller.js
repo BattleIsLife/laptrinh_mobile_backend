@@ -1,9 +1,9 @@
 import CreditAccountModel from "../models/credit_account.model.js";
 import UserModel from "../models/user.model.js";
 
-const isValidUserId = (id) => {
-    const userId = String(id);
-    if (!/^[1-9]\d*$/.test(userId)) {
+const isValidId = (id) => {
+    const parsedId = String(id);
+    if (!/^[1-9]\d*$/.test(parsedId)) {
         return false;
     }
     return BigInt(id) <= 18446744073709551615n;
@@ -11,7 +11,7 @@ const isValidUserId = (id) => {
 
 const getUser = async (req, res) => {
     const user_id = req.user?.id
-    if (!isValidUserId(user_id)) {
+    if (!isValidId(user_id)) {
         return res.status(401).json({ status: 'false', message: 'Token không chứa ID người dùng hợp lệ' });
     }
 
@@ -34,6 +34,37 @@ const getUser = async (req, res) => {
 // 'current_balance',
 // 'opened_date'
 
+// Trả về tất cả thẻ tín dụng của user
+// Trả về thông tin thẻ tín dụng hiện tại
+export const getCreditAccount = async (req, res) => {
+    const user = await getUser(req, res);
+    const { account_id } = req.query;
+    try {
+        const account = account_id ? await CreditAccountModel.getAccountByIdAndUser(account_id, user.id) 
+                                   : await CreditAccountModel.getAccountsByUser(user.id);
+        if(!account)
+        {
+            return res.status(400).json({
+                status: "false", 
+                message: "Không tìm thấy tài khoản"}
+            );
+        }
+
+        return res.status(200).json({
+            status: "true",
+            data: account
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({
+            status: "false",
+            message: "Có lỗi xảy ra từ phía máy chủ",
+        });
+    }
+};
+
+
 // Mở thẻ tín dụng
 export const openCreditAccount = async (req, res) => {
     const user = await getUser(req, res);
@@ -42,26 +73,26 @@ export const openCreditAccount = async (req, res) => {
 
         if(!account_type || (account_type !== "CREDIT_CARD" && account_type !== "OVERDRAFT"))
             return res.status(400).json({
-                                            status: "false", 
-                                            message: "Loại tài khoản không hợp lệ, phải là CREDIT_CARD hoặc OVERDRAFT"}
-                                        );
+                status: "false", 
+                message: "Loại tài khoản không hợp lệ, phải là CREDIT_CARD hoặc OVERDRAFT"}
+            );
         if(!bank_name)
             return res.status(400).json({
-                                            status: "false", 
-                                            message: "Vui lòng nhập tên ngân hàng"}
-                                        );
+                status: "false", 
+                message: "Vui lòng nhập tên ngân hàng"}
+            );
         if(!credit_limit || typeof credit_limit !== 'number'
                     || credit_limit < 0)
             return res.status(400).json({
-                                            status: "false", 
-                                            message: "Hạn mức tín dụng phải là 1 số thập phân không âm, tối đa 2 chữ số sau dấu phảy"}
-                                        );
+                status: "false", 
+                message: "Hạn mức tín dụng phải là 1 số thập phân không âm, tối đa 2 chữ số sau dấu phảy"}
+            );
         if(!current_balance || typeof credit_limit !== 'number'
                     || current_balance < 0)
             return res.status(400).json({
-                                            status: "false", 
-                                            message: "Số dư tài khoản phải là 1 số thập phân không âm, tối đa 2 chữ số sau dấu phảy"}
-                                        );
+                status: "false", 
+                message: "Số dư tài khoản phải là 1 số thập phân không âm, tối đa 2 chữ số sau dấu phảy"}
+            );
         let new_opened_date = opened_date ?? new Date();
         
         await CreditAccountModel.create(user.id, account_type, bank_name, credit_limit, current_balance, new_opened_date);
@@ -74,6 +105,6 @@ export const openCreditAccount = async (req, res) => {
         return res.status(400).json({
             status: "false",
             message: "Có lỗi xảy ra từ phía máy chủ",
-        })   
+        });
     }
 }

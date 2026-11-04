@@ -2,11 +2,18 @@ import pool from "../config/database.js";
 
 export default class CreditAccountModel {
 
-    // Lấy tài khoản của người dùng
+    // Lấy tất cả tài khoản của người dùng
+    static async getAccountsByUser(user_id) {
+        const sql = `SELECT * FROM credit_accounts WHERE user_id = ?`;
+        const [rows] = await pool.execute(sql, [user_id]);
+        return rows;
+    }
+
+    // Lấy tài khoản cụ thể của người dùng
     static async getAccountByIdAndUser(id, user_id) {
         const sql = `SELECT * FROM credit_accounts WHERE id = ? AND user_id = ?`;
         const [rows] = await pool.execute(sql, [id, user_id]);
-        return rows[0] ?? null;
+        return rows[0];
     }
 
     // Thêm tài khoản tín dụng
@@ -18,7 +25,7 @@ export default class CreditAccountModel {
         return rows.insertedId ?? null;
     }
 
-    // Sửa tài khoản tín dụng
+    // Cập nhật tài khoản tín dụng
     static async update(id, user_id, account_type, bank_name, credit_limit, current_balance)
     {
         const sql = `UPDATE credit_accounts SET account_type = ?,
@@ -30,7 +37,7 @@ export default class CreditAccountModel {
         return rows.affectedRows ?? null;
     }
 
-    // Xóa tài khoản tín dụng (hoặc là đóng tài khoản)
+    // Đóng tài khoản tín dụng
     static async close(id, user_id, closed_date)
     {
         const sql = `UPDATE credit_accounts SET closed_date = ?,
