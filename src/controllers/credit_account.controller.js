@@ -107,28 +107,19 @@ export const openCreditAccount = async (req, res) => {
     const user = await getUser(req, res);
     const { account_type, bank_name, credit_limit, current_balance, opened_date } = req.body;
 
-    if(!account_type || (account_type !== "CREDIT_CARD" && account_type !== "OVERDRAFT"))
-        return res.status(400).json({
-            status: "false", 
-            message: "Loại tài khoản không hợp lệ, phải là CREDIT_CARD hoặc OVERDRAFT"}
-        );
-    if(!bank_name)
-        return res.status(400).json({
-            status: "false", 
-            message: "Vui lòng nhập tên ngân hàng"}
-        );
-    if(!credit_limit || typeof credit_limit !== 'number'
-                || credit_limit < 0)
-        return res.status(400).json({
-            status: "false", 
-            message: "Hạn mức tín dụng phải là 1 số thập phân không âm, tối đa 2 chữ số sau dấu phảy"}
-        );
-    if(!current_balance || typeof current_balance !== 'number'
-                || current_balance < 0)
-        return res.status(400).json({
-            status: "false", 
-            message: "Số dư tài khoản phải là 1 số thập phân không âm, tối đa 2 chữ số sau dấu phảy"}
-        );
+    const body = {
+        account_type: account_type,
+        bank_name: bank_name,
+        credit_limit: credit_limit,
+        current_balance: current_balance,
+    }
+
+    // Validate
+    const validationError = validateChanges(body);
+    if (validationError) {
+        return res.status(400).json({ status: "false", message: validationError });
+    }
+
     let new_opened_date = opened_date ?? new Date();
     
     try {
