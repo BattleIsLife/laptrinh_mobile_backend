@@ -307,3 +307,15 @@ CREATE TABLE notifications (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   INDEX idx_user_notif (user_id, is_read, created_at)
 ) ENGINE=InnoDB COMMENT='Thông báo và nhắc nhở';
+
+-- =================================================
+-- 15. CREDIT_APPLICATIONS - Yêu cầu mở tín dụng
+-- =================================================
+CREATE TABLE `credit_applications`(
+    id bigint unsigned PRIMARY KEY AUTO_INCREMENT,
+    user_id bigint unsigned NOT NULL,
+    name varchar(100) NOT NULL,
+    credit_type varchar(100) NOT NULL,
+    application_date date NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
