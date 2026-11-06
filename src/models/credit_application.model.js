@@ -17,11 +17,11 @@ export default class CreditApplicationModel {
         const sql = `INSERT INTO credit_applications(user_id, name, credit_type, application_date) 
                                                     VALUES(?, ?, ?, NOW())`;
         const [rows] = await pool.execute(sql, [user_id, name, credit_type]);
-        return rows.insertedId ?? null;
+        return rows.insertId ?? null;
     }
 
     static async delete(application_id, user_id){
-        const sql = `DELETE FROM credit_appications WHERE id = ? AND user_id = ?`;
+        const sql = `DELETE FROM credit_applications WHERE id = ? AND user_id = ?`;
         const [rows] = await pool.execute(sql, [application_id, user_id]);
         return rows.affectedRows ?? null;
     }

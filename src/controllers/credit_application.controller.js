@@ -77,6 +77,7 @@ export const createApplication = async (req, res) => {
         const insertedId = await CreditApplicationModel.create(user.id, name, credit_type);
         if(insertedId)
             return res.status(200).json({ status: "success", message: "Tạo yêu cầu tín dụng thành công" });
+        return res.status(400).json({ status: "false", message: "Tạo yêu cầu tín dụng thất bại" });
     } catch (error) {
         return res.status(400).json({
             status: "false",
@@ -95,10 +96,14 @@ export const deleteAppication = async (req, res) => {
             message: "Id yêu cầu tín dụng không hợp lệ",
         });
     try {
+        const application = await CreditApplicationModel.getOneFromUser(user.id, application_id);
+        if(!application)
+            return res.status(400).json({ status: "false", message: "Không tìm thấy tài khoản"});
         const deleted = await CreditApplicationModel.delete(application_id, user.id)
         if (deleted) {
             return res.status(200).json({ status: "success", message: "Đã xóa yêu cầu tín dụng thành công"});
         }
+        return res.status(400).json({ status: "success", message: "Xóa yêu cầu tín dụng thất bại"});
     } catch (error) {
         return res.status(400).json({
             status: "false",

@@ -27,7 +27,7 @@ router.delete('/api/credit_accounts', verifyToken, closeCreditAccount);
 router.get('/api/credit_applications', verifyToken, getApplication);
 
 // Mở yêu cầu tín dụng
-router.post('/api/credit_appications', verifyToken, createApplication);
+router.post('/api/credit_applications', verifyToken, createApplication);
 
 // Xóa yêu cầu tín dụng
 router.delete('/api/credit_applications', verifyToken, deleteAppication);

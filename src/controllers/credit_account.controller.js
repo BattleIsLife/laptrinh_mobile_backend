@@ -123,10 +123,15 @@ export const openCreditAccount = async (req, res) => {
     let new_opened_date = opened_date ?? new Date();
     
     try {
-        await CreditAccountModel.create(user.id, account_type, bank_name, credit_limit, current_balance, new_opened_date);
-        return res.status(200).json({
+        const id = await CreditAccountModel.create(user.id, account_type, bank_name, credit_limit, current_balance, new_opened_date);
+        if(id)
+            return res.status(200).json({
             status: "success",
             message: "Đã thêm tài khoản tín dụng thành công"
+            });
+        return res.status(400).json({
+            status: "success",
+            message: "Đã thêm tài khoản tín dụng thất bại"
         })
     } catch (error) {
         return res.status(400).json({
