@@ -181,7 +181,7 @@ export const closeCreditAccount = async (req, res) => {
             return res.status(400).json({ status: "false", message: "Không tìm thấy tài khoản" });
         return res.status(200).json({
             status: "success",
-            message: "Đã cập nhật tài khoản tín dụng thành công"
+            message: "Đã đóng tài khoản tín dụng thành công"
         })
     } catch (error) {
         return res.status(400).json({
