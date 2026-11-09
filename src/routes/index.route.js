@@ -12,3 +12,19 @@ router.use(profileRoute);
 router.use(authRoute); 
 router.use(testAuth);
 export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import incomeRoute from './income.route.js'
+router.use(incomeRoute)

@@ -1,23 +1,18 @@
 import { Router } from 'express'
-import { getIncomeTransactions, getIncomeTransaction, addIncomeTransaction, updateIncomeTransaction, deleteIncomeTransaction, getLineChart } from '../controllers/income.controller';
+import { getIncomeTransactions, getIncomeTransaction, getStatistic, addIncomeTransaction, updateIncomeTransaction, deleteIncomeTransaction} from '../controllers/income.controller.js';
+import { verifyToken } from '../middlewares/auth.middleware.js';
 const router = Router();
 
-// Lấy thông tin 1 giao dịch thu nhập 
-router.get("/api/income/:id", getIncomeTransaction)
+router.route("/api/income")
+.get(verifyToken, getIncomeTransactions) // Lấy danh sách các giao dịch thu nhập
+.post(verifyToken, addIncomeTransaction) // Tạo một giao dịch thu nhập
 
-// Lấy danh sách các thu nhập
-router.get("/api/income/", getIncomeTransactions)
+// Lấy dữ liệu thống kê thu nhập
+router.get("/api/income/statistic",verifyToken, getStatistic)
 
-// Lấy biểu đồ đường thu nhập theo thời gian
-router.get("/api/income/statistic", getLineChart)
-
-// Sửa một giao dịch thu nhập
-router.post("/api/income/", addIncomeTransaction)
-
-// Cập nhật một giao dịch thu nhập
-router.put("/api/income", updateIncomeTransaction)
-
-// Xóa một giao dịch thu nhập
-router.delete("/api/income", deleteIncomeTransaction)
+router.route("/api/income/:id")
+.get(verifyToken, getIncomeTransaction) // Lấy thông tin 1 giao dịch thu nhập 
+.put(verifyToken, updateIncomeTransaction) // Cập nhật một giao dịch thu nhập
+.delete(verifyToken, deleteIncomeTransaction) // Xóa một giao dịch thu nhập
 
 export default router;
