@@ -30,7 +30,7 @@ export default class CreditAccountModel {
         const sql = `INSERT INTO credit_accounts(user_id, account_type, bank_name, credit_limit, current_balance, opened_date) 
                                  VALUES(?, ?, ?, ?, ?, ?)`;
         const [rows] = await pool.execute(sql, [user_id, account_type, bank_name, credit_limit, current_balance, opened_date])
-        return rows.insertedId ?? null;
+        return rows.insertId ?? null;
     }
 
     // Cập nhật tài khoản tín dụng
