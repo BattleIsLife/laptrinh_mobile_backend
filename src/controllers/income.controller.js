@@ -175,7 +175,7 @@ export const getIncomeTransactions = async (req, res) => {
                 status: "success",
                 message: "Lấy danh sách thu nhập thành công",
                 data: transactions_data,
-                total_items: Object.keys(transactions_data).length
+                total_items: transactions_data.length
             });
         } else {
             // Không phải số thì mặc định dùng page = 0
@@ -184,7 +184,7 @@ export const getIncomeTransactions = async (req, res) => {
                 status: "success",
                 message: "Lấy danh sách thu nhập thành công",
                 data: transactions_data,
-                total_items: Object.keys(transactions_data).length
+                total_items: transactions_data.length
             });
         }
 
@@ -215,7 +215,7 @@ export const getStatistic = async (req, res) => {
             message: "Lấy thống kê thu nhập thành công",
             total_income: total_income,
             data: createIncomeStatisticArray(statistic, month, year),
-            struture: createIncomeStructureArray(structure, total_income)
+            structure: createIncomeStructureArray(structure, total_income)
         });
     } catch (error) {
         console.log(error.message);
