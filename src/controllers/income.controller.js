@@ -12,17 +12,58 @@ function amountValidator(amount) {
     if (!amount) {
         return { is_valid: false, message: "Số tiền không được để trống" }
     }
-    const cleanAmount = Math.floor(Number(amount)).toString(); // chuyển về dạng chuỗi số nguyên 
+    if (typeof amount !== 'string') {
+        return { is_valid: false, message: 'Số tiền phải là một chuỗi ký tự số' };
+    }
 
-    if (!/^[1-9]\d{0,12}(\.0{1,2})?$/.test(cleanAmount)) {
+    if (!/^[1-9]\d{0,12}$/.test(amount)) {
         /* Giải thích regex:
             /^, $/: ký hiệu bắt đầu, kết thúc chuỗi regex
-            ([1-9]\d{0,12}): Phần số nguyên, bắt đầu  chứa từ 1 đến 13 số bất kỳ có giá trị từ 1-9
-            (\.0{1,2})?: Phần thập phân tùy chọn, chỉ cho phép .0 hoặc .00 nếu điền
+            ([1-9]\d{0,12}): Phần số nguyên, bắt đầu từ từ 1 đến 9; các giá trị phía sau từ 0 đến 9, tối thiểu 0 và tối đa 12
         */
-        return { is_valid: false, message: "Số tiền không được âm và tối đa 13 chữ số, không được chứa số lẻ sau phần thập phân" };
+        return { is_valid: false, message: "Số tiền không được âm, giá trị tối thiểu là 1 và chứa tối đa 13 chữ số, không được chứa phần thập phân" };
     }
-    return { is_valid: true, valid_email: clean_email }
+    return { is_valid: true, valid_amount: amount }
+}
+function incomeTypeValidator(income_type) {
+    const valid_income_type = ["SALARY", "BUSINESS", "INVESTMENT", "OTHER"];
+    if (valid_income_type.find((type) => income_type === type) === undefined) {
+        return { is_valid: false, message: "Loại thu nhập không hợp lệ" }
+    }
+    return { is_valid: true, valid_income_type: income_type }
+}
+function transactionDateValidator(transaction_date) {
+    // Kiểm tra không được để trống (null, undefined, chuỗi rỗng, hoặc chỉ toàn khoảng trắng)
+    if (transaction_date === null || transaction_date === undefined || (typeof transaction_date === 'string' && transaction_date.trim() === '')) {
+        return { is_valid: false, message: "Ngày giao dịch không được để trống" };
+    }
+    // Ép kiểu về string và xóa khoảng trắng thừa ở 2 đầu (nếu có)
+    const clean_date = String(transaction_date).trim();
+    // Kiểm tra định dạng YYYY-MM-DD
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(clean_date)) {
+        return {
+            is_valid: false, message: "Ngày giao dịch không hợp lệ (phải có dạng YYYY-MM-DD và năm lớn hơn 1900)"
+        };
+    }
+
+    // Tách năm, tháng, ngày
+    const [year, month, day] = clean_date.split('-').map(Number);
+    // Kiểm tra điều kiện năm lớn hơn 1000
+    if (year <= 1900) {
+        return { is_valid: false, message: "Ngày giao dịch không hợp lệ (phải có dạng YYYY-MM-DD và năm lớn hơn 1900)" };
+    }
+
+    // Kiểm tra tính logic của ngày tháng (dùng UTC để tránh lệch múi giờ)
+    const date = new Date(Date.UTC(year, month - 1, day));
+    const is_logical = date.getUTCFullYear() === year
+        && date.getUTCMonth() === month - 1
+        && date.getUTCDate() === day;
+    if (!is_logical) {
+        return {
+            is_valid: false, message: "Ngày giao dịch không hợp lệ (phải có dạng YYYY-MM-DD và năm lớn hơn 1900)"
+        };
+    }
+    return { is_valid: true, valid_date: clean_date };
 }
 function getDaysInMonth(month, year) {
     // month truyền vào từ 0 (Tháng 1) đến 11 (Tháng 12)
@@ -44,12 +85,12 @@ function createIncomeStatisticArray(statistic, month = now.getMonth() + 1, year 
     const daysInMonth = getDaysInMonth(month, year);
     console.log(daysInMonth);
     const final_statistic = [];
-    for(const date of daysInMonth){
+    for (const date of daysInMonth) {
         const total_income_by_date = statistic.find((data) => data.date === date);
         if (total_income_by_date) {
-            final_statistic.push({amount: total_income_by_date.amount, date:date});
+            final_statistic.push({ amount: total_income_by_date.amount, date: date });
         } else {
-            final_statistic.push({amount: "0", date:date});
+            final_statistic.push({ amount: "0", date: date });
         }
     }
 
@@ -183,13 +224,184 @@ export const getStatistic = async (req, res) => {
 }
 
 export const addIncomeTransaction = async (req, res) => {
-
+    try {
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        const { source, amount, income_type, transaction_date, description } = req.body;
+        const errors = {}
+        const valid_data = {}
+        valid_data.user_id = user_id; // gán mã người dùng cần thêm
+        // Validate dữ liệu
+        if (!source) {
+            valid_data.source = "";
+        } else {
+            if (source.length > 50) {
+                errors.source = "Tên nguồn thu nhập không được quá 50 ký tự";
+            } else {
+                valid_data.source = source;
+            }
+        }
+        const amount_validator = amountValidator(amount);
+        if (amount_validator.is_valid == false) {
+            errors.amount = amount_validator.message;
+        } else {
+            valid_data.amount = amount_validator.valid_amount;
+        }
+        const income_type_validator = incomeTypeValidator(income_type);
+        if (income_type_validator.is_valid == false) {
+            errors.income_type = income_type_validator.message;
+        } else {
+            valid_data.income_type = income_type_validator.valid_income_type;
+        }
+        const transaction_date_validator = transactionDateValidator(transaction_date);
+        if (transaction_date_validator.is_valid == false) {
+            errors.transaction_date = transaction_date_validator.message;
+        } else {
+            valid_data.transaction_date = transaction_date_validator.valid_date;
+        }
+        if (!description) {
+            valid_data.description = "";
+        } else {
+            if (description.length > 255) {
+                errors.description = "Mô tả không được quá 255 ký tự";
+            } else {
+                valid_data.description = description;
+            }
+        }
+        if (Object.keys(errors).length !== 0) {
+            return res.status(400).send({ status: "false", message: "Dữ liệu đầu vào không hợp lệ", errors: errors })
+        }
+        const insertedId = await IncomeModel.addIncomeTransaction(valid_data);
+        if (insertedId) {
+            return res.status(201).json({ status: "success", message: "Tạo giao dịch thu nhập thành công" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
 }
 
 export const updateIncomeTransaction = async (req, res) => {
-
+    try {
+        // Kiểm tra người dùng có tồn tại 
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        // Kiểm tra ID giao dịch thu nhập
+        const id = parseInt(req.params.id);
+        if (!isValidId(id)) {
+            return res.status(400).send({
+                status: "false",
+                message: "Mã giao dịch thu nhập không hợp lệ"
+            });
+        }
+        // Không tìm thấy giao dịch
+        const income_transaction_data = await IncomeModel.getIncomeTransaction(id, user_id);
+        if (!income_transaction_data) {
+            return res.status(404).send({
+                status: "false",
+                message: "Không tìm thấy giao dịch thu nhập để cập nhật"
+            });
+        }
+        const { source, amount, income_type, transaction_date, description } = req.body;
+        const errors = {}
+        const valid_data = {}
+        valid_data.transaction_id = id; // gán mã giao dịch cần cập nhật
+        // Validate dữ liệu
+        if (!source) {
+            valid_data.source = "";
+        } else {
+            if (source.length > 50) {
+                errors.source = "Tên nguồn thu nhập không được quá 50 ký tự";
+            } else {
+                valid_data.source = source;
+            }
+        }
+        const amount_validator = amountValidator(amount);
+        if (amount_validator.is_valid == false) {
+            errors.amount = amount_validator.message;
+        } else {
+            valid_data.amount = amount_validator.valid_amount;
+        }
+        const income_type_validator = incomeTypeValidator(income_type);
+        if (income_type_validator.is_valid == false) {
+            errors.income_type = income_type_validator.message;
+        } else {
+            valid_data.income_type = income_type_validator.valid_income_type;
+        }
+        const transaction_date_validator = transactionDateValidator(transaction_date);
+        if (transaction_date_validator.is_valid == false) {
+            errors.transaction_date = transaction_date_validator.message;
+        } else {
+            valid_data.transaction_date = transaction_date_validator.valid_date;
+        }
+        if (!description) {
+            valid_data.description = "";
+        } else {
+            if (description.length > 255) {
+                errors.description = "Mô tả không được quá 255 ký tự";
+            } else {
+                valid_data.description = description;
+            }
+        }
+        if (Object.keys(errors).length !== 0) {
+            return res.status(400).send({ status: "false", message: "Dữ liệu đầu vào không hợp lệ", errors: errors })
+        }
+        // return res.status(200).json({ status: "success", message: "Cập nhật giao dịch thu nhập thành công", data: valid_data});
+        const affectedRows = await IncomeModel.updateIncomeTransaction(valid_data);
+        if (affectedRows == 1) {
+            return res.status(200).json({ status: "success", message: "Cập nhật giao dịch thu nhập thành công" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
 }
 
 export const deleteIncomeTransaction = async (req, res) => {
-
+    try {
+        // Kiểm tra người dùng có tồn tại 
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        // Kiểm tra ID giao dịch thu nhập
+        const id = parseInt(req.params.id);
+        if (!isValidId(id)) {
+            return res.status(400).send({
+                status: "false",
+                message: "Mã giao dịch thu nhập không hợp lệ"
+            });
+        }
+        // Không tìm thấy giao dịch
+        const income_transaction_data = await IncomeModel.getIncomeTransaction(id, user_id);
+        if (!income_transaction_data) {
+            return res.status(404).send({
+                status: "false",
+                message: "Không tìm thấy giao dịch thu nhập để xóa"
+            });
+        }
+        const affectedRows = await IncomeModel.deleteIncomeTransaction(id);
+        if (affectedRows == 1) {
+            return res.status(200).json({ status: "success", message: "Xóa giao dịch thu nhập thành công" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
 }
