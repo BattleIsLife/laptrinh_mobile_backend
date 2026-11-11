@@ -80,10 +80,10 @@ const validateChanges = (body) => {
 export const getAssets = async (req, res) => {
     const user = await getUser(req, res);
     const user_id = user.id;
-    const { asset_id } = req.query;
+    const { asset_id, page, month, year } = req.query;
     try {
         const assets = isValidId(asset_id) ? await AssetModel.readById(user_id, asset_id)
-                                           : await AssetModel.readAll(user_id);
+                                           : await AssetModel.readAll(user_id, page, month, year);
         if(assets.length > 0)
         {
             return res.status(200).json({

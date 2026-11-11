@@ -8,9 +8,23 @@ const ASSET_FIELD = new Set([
 
 export default class AssetModel {
     // Lấy danh sách các tài sản
-    static async readAll(user_id){
-        const sql = "SELECT * FROM assets WHERE user_id = ?";
-        const [rows] = await pool.execute(sql, [user_id]);
+    static async readAll(user_id, page, month, year){
+        let sql = "SELECT * FROM assets WHERE user_id = ? ";
+        let additional_conditions = [];
+        let params = [user_id];
+        if(month && year)
+        {
+            sql += " AND MONTH(created_at) = ? AND YEAR(created_at) = ?";
+            params.push(month, year);
+        }
+
+        page = (page && page > 0) ? page : 1;
+        const offset = (page - 1) * 10;
+        sql += ` LIMIT 10 OFFSET ${offset}`;
+        params.push(page);
+        console.log(sql)
+
+        const [rows] = await pool.execute(sql, params);
         return rows ?? null;
     };
 
