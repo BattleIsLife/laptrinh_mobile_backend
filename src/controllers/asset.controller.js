@@ -96,7 +96,10 @@ export const getAssets = async (req, res) => {
             message: "Không tìm thấy dữ liệu!"
         });
     } catch (error) {
-        
+        return res.status(400).json({
+            status: "false",
+            message: "Có lỗi xảy ra từ phía máy chủ",
+        });
     }
 };
 

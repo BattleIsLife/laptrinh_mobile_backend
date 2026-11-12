@@ -90,7 +90,7 @@ const validateChanges = (body) => {
 
         if(key === "interest_rate" &&
             (isNotNumber(value) || (value < 0)))
-            return "Lãi suất hàng tháng phải là 1 số không âm";
+            return "Lãi suất phải là 1 số không âm";
 
         if(key === "target_date" && (!isValidDate(value) || new Date(value) <= new Date()))
         {
@@ -190,7 +190,7 @@ export const editSaving = async (req, res) => {
     {
         return res.status(400).json({
             status: "false",
-            message: "Id tài sản không hợp lệ"
+            message: "Id mục tiêu tiết kiệm không hợp lệ"
         })
     }
 
@@ -207,7 +207,7 @@ export const editSaving = async (req, res) => {
     {
         return res.status(400).json({
             status: "false",
-            message: "Tài sản không tồn tại"
+            message: "Mục tiêu tiết kiệm không tồn tại"
         })
     }
 
