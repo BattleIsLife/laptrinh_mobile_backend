@@ -1,11 +1,13 @@
-import pool from "../config/database";
+import pool from "../config/database.js";
 
 const SAVING_FIELD = new Set([
     "name", 
     "target_amount", 
     "monthly_contribution", 
     "target_date", 
-    "interest_rate"
+    "interest_rate",
+    "current_amount",
+    "status"
 ]);
 
 export default class SavingModel{
@@ -34,10 +36,11 @@ export default class SavingModel{
         return rows[0] ?? null;
     }
 
-    static async create(name, target_amount, monthly_contribution, target_date, interest_rate){
-        const sql = `INSERT INTO savings(name, target_amount, monthly_contribution, target_date, interest_rate)
+    static async create(user_id, name, target_amount, monthly_contribution, target_date, interest_rate){
+        const sql = `INSERT INTO savings(user_id, name, target_amount, monthly_contribution, target_date, interest_rate)
                                   VALUES(?, ?, ?, ?, ?, ?)`;
-        const [rows] = await pool.execute(sql, [name, target_amount, monthly_contribution, target_date, interest_rate]);
+        
+        const [rows] = await pool.execute(sql, [user_id, name, target_amount, monthly_contribution, target_date, interest_rate]);
         return rows.insertId ?? null;
     }
 
