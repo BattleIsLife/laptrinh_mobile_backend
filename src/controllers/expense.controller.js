@@ -220,13 +220,178 @@ export const getStatistic = async (req, res) => {
 }
 
 export const addExpenseTransaction = async (req, res) => {
-
+    try {
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        const { amount, category_id, transaction_date, description } = req.body;
+        const errors = {}
+        const valid_data = {}
+        valid_data.user_id = user_id; // gán mã người dùng cần thêm
+        // Validate dữ liệu
+        const amount_validator = amountValidator(amount);
+        if (amount_validator.is_valid == false) {
+            errors.amount = amount_validator.message;
+        } else {
+            valid_data.amount = amount_validator.valid_amount;
+        }
+        if (!category_id) {
+            errors.category_id = "Bạn chưa chọn danh mục chi tiêu";
+        } else if (!isValidId(category_id)) {
+            errors.category_id = "Mã danh mục chi tiêu không hợp lệ";
+        }
+        else {
+            const category = await ExpenseCategoryModel.getExpenseCaterogy(category_id)
+            if (!category) {
+                errors.category_id = "Không tìm thấy danh mục chi tiêu hoặc danh mục không hợp lệ";
+            } else {
+                valid_data.category_id = category_id;
+            }
+        }
+        const transaction_date_validator = transactionDateValidator(transaction_date);
+        if (transaction_date_validator.is_valid == false) {
+            errors.transaction_date = transaction_date_validator.message;
+        } else {
+            valid_data.transaction_date = transaction_date_validator.valid_date;
+        }
+        if (!description) {
+            valid_data.description = "";
+        } else {
+            if (description.length > 255) {
+                errors.description = "Mô tả không được quá 255 ký tự";
+            } else {
+                valid_data.description = description;
+            }
+        }
+        if (Object.keys(errors).length !== 0) {
+            return res.status(400).send({ status: "false", message: "Dữ liệu đầu vào không hợp lệ", errors: errors })
+        }
+        const insertedId = await ExpenseModel.addExpenseTransaction(valid_data);
+        if (insertedId) {
+            return res.status(201).json({ status: "success", message: "Tạo giao dịch chi tiêu thành công" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
 }
 
 export const updateExpenseTransaction = async (req, res) => {
-
+    try {
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        // Kiểm tra ID giao dịch chi tiêu
+        const id = parseInt(req.params.id);
+        if (!isValidId(id)) {
+            return res.status(400).send({
+                status: "false",
+                message: "Mã giao dịch chi tiêu không hợp lệ"
+            });
+        }
+        // Không tìm thấy giao dịch
+        const expense_transaction_data = await ExpenseModel.getExpenseTransaction(id, user_id);
+        if (!expense_transaction_data) {
+            return res.status(404).send({
+                status: "false",
+                message: "Không tìm thấy giao dịch chi tiêu để cập nhật"
+            });
+        }
+        const { amount, category_id, transaction_date, description } = req.body;
+        const errors = {}
+        const valid_data = {}
+        valid_data.transaction_id = id; // gán mã giao dịch cần cập nhật
+        // Validate dữ liệu
+        const amount_validator = amountValidator(amount);
+        if (amount_validator.is_valid == false) {
+            errors.amount = amount_validator.message;
+        } else {
+            valid_data.amount = amount_validator.valid_amount;
+        }
+        if (!category_id) {
+            errors.category_id = "Bạn chưa chọn danh mục chi tiêu";
+        } else if (!isValidId(category_id)) {
+            errors.category_id = "Mã danh mục chi tiêu không hợp lệ";
+        }
+        else {
+            const category = await ExpenseCategoryModel.getExpenseCaterogy(category_id)
+            if (!category) {
+                errors.category_id = "Không tìm thấy danh mục chi tiêu hoặc danh mục không hợp lệ";
+            } else {
+                valid_data.category_id = category_id;
+            }
+        }
+        const transaction_date_validator = transactionDateValidator(transaction_date);
+        if (transaction_date_validator.is_valid == false) {
+            errors.transaction_date = transaction_date_validator.message;
+        } else {
+            valid_data.transaction_date = transaction_date_validator.valid_date;
+        }
+        if (!description) {
+            valid_data.description = "";
+        } else {
+            if (description.length > 255) {
+                errors.description = "Mô tả không được quá 255 ký tự";
+            } else {
+                valid_data.description = description;
+            }
+        }
+        if (Object.keys(errors).length !== 0) {
+            return res.status(400).send({ status: "false", message: "Dữ liệu đầu vào không hợp lệ", errors: errors })
+        }
+        const insertedId = await ExpenseModel.updateExpenseTransaction(valid_data);
+        if (insertedId) {
+            return res.status(201).json({ status: "success", message: "Cập nhật giao dịch chi tiêu thành công" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
 }
 
 export const deleteExpenseTransaction = async (req, res) => {
-
+    try {
+        // Kiểm tra người dùng có tồn tại 
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        // Kiểm tra ID giao dịch thu nhập
+        const id = parseInt(req.params.id);
+        if (!isValidId(id)) {
+            return res.status(400).send({
+                status: "false",
+                message: "Mã giao dịch chi tiêu không hợp lệ"
+            });
+        }
+        // Không tìm thấy giao dịch
+        const expense_transaction_data = await ExpenseModel.getExpenseTransaction(id, user_id);
+        if (!expense_transaction_data) {
+            return res.status(404).send({
+                status: "false",
+                message: "Không tìm thấy giao dịch chi tiêu để xóa"
+            });
+        }
+        const affectedRows = await ExpenseModel.deleteExpenseTransaction(id);
+        if (affectedRows == 1) {
+            return res.status(200).json({ status: "success", message: "Xóa giao dịch chi tiêu thành công" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
 }

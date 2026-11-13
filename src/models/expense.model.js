@@ -43,12 +43,18 @@ export default class ExpenseModel {
         return rows[0].amount ?? 0; // nếu có giá trị thì trả về, ngược lại trả về 0
     }
     static async addExpenseTransaction(data) {
-        
+        const sql = "INSERT INTO expense_transactions (user_id, amount, category_id, transaction_date, description) VALUES (?, ?, ?, ?, ?)";
+        const [result] = await dbPool.execute(sql, [data.user_id, data.amount, data.category_id, data.transaction_date, data.description]);
+        return result.insertId;
     }
     static async updateExpenseTransaction(data) {
-        
+        const sql = "UPDATE expense_transactions SET amount = ?, category_id = ?, transaction_date = ?, description = ? WHERE id = ?";
+        const [result] = await dbPool.execute(sql, [data.amount, data.category_id, data.transaction_date, data.description, data.transaction_id]);
+        return result.affectedRows;
     }
     static async deleteExpenseTransaction(id) {
-        
+        const sql = "DELETE FROM expense_transactions WHERE id = ?";
+        const [result] = await dbPool.execute(sql, [id]);
+        return result.affectedRows;
     }   
 }

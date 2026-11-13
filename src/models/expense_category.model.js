@@ -11,6 +11,6 @@ export default class ExpenseCategoryModel{
     static async getExpenseCaterogy(id){
         const sql = "SELECT * FROM categories WHERE id = ?";
         const [rows] = await dbPool.execute(sql, [id]);
-        return rows;
+        return rows[0];
     }
 }
