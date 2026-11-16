@@ -8,3 +8,4 @@ Nơi đây chứa mục lục tài liệu API
 - [3. Tài liệu API Tài khoản tín dụng](03.%20tai_lieu_api_tai_khoan_tin_dung.md)
 - [4. Tài liệu API Quản lý tài sản](04.%20tai_lieu_api_tai_san.md)
 - [5. Tài liệu API Quản lý thu nhập](05.%20tai_lieu_api_income.md)
+- [6. Tài liệu API Quản lý mục tiêu tiết kiệm](06.%20tai_lieu_api_muc_tieu_tiet_kiem.md)

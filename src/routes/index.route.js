@@ -7,6 +7,7 @@ import testAuth from './testAuth.route.js';
 import creditAccoutRoute from './credit_account.route.js';
 import assetRoute from './asset.route.js';
 import incomeRoute from './income.route.js';
+import savingRoute from './saving.route.js';
 
 
 const router = Router();
@@ -17,4 +18,5 @@ router.use(testAuth);
 router.use(creditAccoutRoute);
 router.use(assetRoute);
 router.use(incomeRoute);
+router.use(savingRoute);
 export default router;
