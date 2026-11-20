@@ -2,10 +2,13 @@ import ProfileModel from '../models/user.model.js';
 
 const PROFILE_FIELDS = new Set([
     'full_name',
+    'phone',
+    'email',
     'date_of_birth',
     'occupation',
     'number_of_dependents',
     'monthly_income'
+    
 ]);
 
 const isValidUserId = (id) => {

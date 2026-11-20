@@ -1,9 +1,12 @@
 import pool from "../config/database.js";
 const PROFILE_FIELDS = new Set([
     'full_name',
+    'phone',
+    'email',
     'date_of_birth',
     'occupation',
     'number_of_dependents',
+    'month_income',
     'monthly_income'
 ]);
 
@@ -36,6 +39,10 @@ export default class UserModel {
              WHERE id = ?`,
             [userId]
         );
+        const profile = rows[0];
+        if (!profile) {
+            return null;
+        }
 
         return rows[0] ?? null;
     }
