@@ -1,0 +1,381 @@
+# Tài liệu API Chi tiêu
+
+## Mục lục
+- [0. Lấy danh sách danh mục chi tiêu ](#0-lấy-danh-sách-danh-mục-chi-tiêu)
+- [1. Lấy thông tin 1 chi tiêu](#1-lấy-thông-tin-1-chi-tiêu)
+- [2. Lấy danh sách chi tiêu](#2-lấy-danh-sách-chi-tiêu)
+- [3. Lấy thống kê chi tiêu](#3-lấy-thống-kê-chi-tiêu)
+- [4. Tạo giao dịch chi tiêu](#4-tạo-giao-dịch-chi-tiêu)
+- [5. Cập nhật giao dịch chi tiêu](#5-cập-nhật-giao-dịch-chi-tiêu)
+- [6. Xóa giao dịch chi tiêu](#6-xóa-giao-dịch-chi-tiêu)
+
+## 0. Lấy danh sách danh mục chi tiêu 
+- Tên: API lấy chi tiết chi tiêu
+- Endpoint: GET `/api/expense_category/`
+- Mô tả: Lấy danh sách các danh mục chi tiêu hiện có trong CSDL.
+- `Content-type: application/json `
+- **Request body mẫu (có thể để trống, không yêu cầu header Authorization khi gọi)**:
+```json
+{
+	
+}
+```
+
+-**Response body**:
+```json
+// Thành công (HTTP Code `200`)
+{
+	"status":"success",
+	"data": [
+        {
+            "id":"1",
+            "name":"Ăn uống",
+            "icon":"fastfood",
+            "is_essential":"1"
+        },
+        {
+            "id":"2",
+            "name":"Nhà ở & Điện nước",
+            "icon":"home",
+            "is_essential":"1" 
+        },
+        {
+            "id":"3",
+            "name":"Đi lại & Xăng xe",
+            "icon":"directions_car",
+            "is_essential":"1" 
+        },
+        {
+            "id":"4",
+            "name":"Giải trí & Cafe",
+            "icon":"sports_esports",
+            "is_essential":"0" 
+        }
+    ]	
+}
+```
+
+## Lưu ý: Tất cả các API đều Yêu cầu đăng nhập thành công trước đó. Gửi JWT nhận được từ API đăng nhập qua header `Authorization`, theo kiểu xác thực Bearer.
+## 1. Lấy thông tin 1 chi tiêu
+- Tên: API lấy chi tiết chi tiêu
+- Endpoint: GET `/api/expense/:id`
+- Mô tả: Lấy chi tiết một bản ghi chi tiêu dựa vào mã giao dịch và mã người dùng. Nếu giao dịch có mã đó không thuộc về người dùng thì trả lỗi, ngược lại trả về đầy đủ thông tin.
+- `Content-type: application/json `
+- **Request body mẫu (có thể để trống)**:
+
+```json
+{
+	
+}
+```
+
+-**Response body**:
+```json
+// Thành công (HTTP Code `200`)
+{
+	"status": "success", 
+    "message": "Lấy thông tin giao dịch chi tiêu thành công", 
+    "data": { 
+        "id": 1, 
+        "amount": "45000.00", 
+        "category_id": "1",
+        "category_name": "Ăn uống", 
+        "transaction_date": "2026-05-10", 
+        "description": "Ăn sáng phở bò"
+    }
+}
+```
+
+```json
+// Trường hợp không tìm thấy người dùng (HTTP Code `404`)
+{
+    "status": "false",
+    "message": "Người dùng không tồn tại"
+}
+```
+
+```json
+// Trường hợp mã giao dịch chi tiêu không hợp lệ (HTTP Code `400`)
+{
+    "status": "false",
+    "message": "Mã giao dịch chi tiêu không hợp lệ"
+}
+```
+
+```json
+// Trường hợp mã giao dịch không tồn tại hoặc giao dịch của người dùng khác (HTTP Code `404`)
+{
+    "status": "false",
+    "message": "Không tìm thấy giao dịch chi tiêu"
+}
+```
+
+## 2. Lấy danh sách chi tiêu
+- Tên: API lấy danh sách chi tiêu của người dùng
+- Endpoint: GET `/api/expense/` 
+(Query String: page mặc định là 0, khoảng thời gian lấy dữ liệu mặc định là tháng này năm này, vd: /api/income?page=1&month=11&year=2026)
+- Mô tả: Lấy danh sách các giao dịch chi tiêu của người dùng, có giới hạn về số bản ghi mỗi lần lấy 
+- `Content-type: application/json `
+- **Request body mẫu (có thể để trống, chủ yếu gửi phạm vi cần lấy dữ liệu qua Query String)**:
+
+```json
+{
+
+}
+```
+
+- **Response body**:
+```json
+// Thành công (HTTP Code `200`)
+{
+	"status": "success", 
+    "message": "Lấy danh sách chi tiêu thành công", 
+    "data": [ 
+        { 
+            "id": 1, 
+            "amount": "45000.00", 
+            "category_name": "Ăn uống", 
+            "transaction_date": "2026-05-10", 
+            "description": "Ăn sáng phở bò"
+        } 
+        { 
+            "id": 2, 
+            "amount": "30000.00", 
+            "category_name": "Đi lại và xăng xe", 
+            "transaction_date": "2026-05-12", 
+            "description": "Gửi xe trung tâm thương mại"
+        }
+        { 
+            "id": 3, 
+            "amount": "3000000.00", 
+            "category_name": "Mua sắm cá nhân", 
+            "transaction_date": "2026-05-15", 
+            "description": "Mua mỹ phẩm dưỡng da"
+        }
+
+    ], 
+    "total_items": 3 // số bản ghi tìm thấy được
+}
+```
+
+```json
+// Trường hợp không tìm thấy người dùng (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Người dùng không tồn tại"
+
+}
+```
+
+## 3. Lấy thống kê chi tiêu
+- Tên: API lấy thống kê chi tiêu của user
+- Endpoint: GET `/api/expense/statistic`
+(khoảng thời gian lấy dữ liệu mặc định là tháng này năm này, vd: api/income/statistic?month=11&year=2026)
+- Mô tả: Lấy tổng chi tiêu, biến động chi tiêu và cơ cấu chi tiêu (theo income_type) của người dùng trong khoảng thời gian
+- `Content-type: application/json `
+- **Request body mẫu (có thể để trống)**:
+
+```json
+{
+	
+}
+```
+
+- **Response body**:
+```json
+// Thành công (HTTP Code `200`)
+{
+	"status": "success", 
+    "message": "Lấy thống kê chi tiêu thành công", 
+    "total_expense": "12000000.00",
+    "data": [
+        {
+            "amount":"150000.00",
+            "date":"2026-06-01"
+        },
+        {
+            "amount":"0",
+            "date":"2026-06-02"
+        },
+        // ...
+        {
+            "amount":"50000.00",
+            "date":"2026-06-08"
+        }
+        // ... các ngày còn lại trong tháng
+    ],
+    "structure": {
+        "Ăn uống": "60",
+        "Nhà ở & Điện nước": "20",
+        "Đi lại & Xăng xe": "10",
+        "Giải trí & Cafe": "10"
+    },
+    "essential rate": "80"
+}
+
+```
+
+```json
+// Trường hợp không tìm thấy người dùng (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Người dùng không tồn tại"
+}
+```
+
+## 4. Tạo giao dịch chi tiêu
+- Tên: API thêm giao dịch chi tiêu
+- Endpoint: POST `/api/expense/`
+- Mô tả: Nhận thông tin từ người dùng, thực hiện validate dữ liệu. Nếu hợp lệ thì ghi nhận vào CSDL, ngược lại báo lỗi tương ứng về cho người dùng.
+- `Content-type: application/json `
+- **Request body mẫu**:
+
+```json
+{
+    "amount": "50000", 
+    "category_id": "1", // mã loại chi tiêu
+    "transaction_date": "2026-06-05", 
+    "description": "Ăn sáng phở gà" 
+}
+```
+
+- **Response body**:
+```json
+// Thành công (HTTP Code `201`)
+{
+	"status":"success",
+	"message":"Tạo giao dịch chi tiêu thành công"
+}
+```
+
+```json
+// Trường hợp không tìm thấy người dùng (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Người dùng không tồn tại"
+}
+```
+
+```json
+// Trường hợp dữ liệu không hợp lệ (HTTP Code `400`)
+{ 
+    "status": "false", 
+    "message": "Dữ liệu đầu vào không hợp lệ", 
+    "errors": { 
+        "amount": "Số tiền không được để trống / Số tiền phải là một chuỗi ký tự số / Số tiền không được âm, giá trị tối thiểu là 1 và chứa tối đa 13 chữ số, không được phần thập phân", 
+        "category": "Bạn chưa chọn danh mục chi tiêu / Mã danh mục chi tiêu không hợp lệ / Không tìm thấy danh mục chi tiêu hoặc danh mục không hợp lệ",
+        "transaction_date" : "Ngày giao dịch không được để trống / Ngày giao dịch không hợp lệ (phải có dạng YYYY-MM-DD và năm lớn hơn 1900)",
+        "description" : "Mô tả không được quá 255 ký tự"
+    } 
+} 
+
+```
+
+## 5. Cập nhật giao dịch chi tiêu
+- Tên: API cập nhật giao dịch chi tiêu
+- Endpoint: PUT `/api/expense/:id`
+- Mô tả: Nhận thông tin từ người dùng, thực hiện validate dữ liệu. Nếu hợp lệ thì cập nhận thông tin giao dịch vào CSDL, ngược lại báo lỗi tương ứng về cho người dùng.
+- `Content-type: application/json `
+- **Request body mẫu**:
+
+```json
+{
+	"amount": "60000", 
+    "category_id": "2", // mã loại chi tiêu
+    "transaction_date": "2026-05-09", 
+    "description": "Ăn sáng phở vịt" 
+}
+```
+
+- **Respond body**:
+```json
+// Thành công (HTTP Code `200`)
+{
+	"status":"success",
+	"message":"Cập nhật giao dịch chi tiêu thành công"
+}
+```
+
+```json
+// Trường hợp không tìm thấy người dùng (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Người dùng không tồn tại"   
+}
+```
+
+```json
+// Trường hợp mã giao dịch chi tiêu không hợp lệ (HTTP Code `400`)
+{
+	"status": "false",
+    "message": "Mã giao dịch chi tiêu không hợp lệ"
+}
+```
+
+```json
+// Trường hợp mã giao dịch không tồn tại hoặc giao dịch của người dùng khác (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Không tìm thấy giao dịch chi tiêu để cập nhật"
+}
+```
+
+```json
+// Trường hợp dữ liệu không hợp lệ (HTTP Code `400`)
+{ 
+    "status": "false", 
+    "message": "Dữ liệu đầu vào không hợp lệ", 
+    "errors": { 
+        "amount": "Số tiền không được để trống / Số tiền phải là một chuỗi ký tự số / Số tiền không được âm, giá trị tối thiểu là 1 và chứa tối đa 13 chữ số, không được phần thập phân", 
+        "category": "Bạn chưa chọn danh mục chi tiêu / Mã danh mục chi tiêu không hợp lệ / Không tìm thấy danh mục chi tiêu hoặc danh mục không hợp lệ",
+        "transaction_date" : "Ngày giao dịch không được để trống / Ngày giao dịch không hợp lệ (phải có dạng YYYY-MM-DD và năm lớn hơn 1900)",
+        "description" : "Mô tả không được quá 255 ký tự"
+    } 
+} 
+```
+
+## 6. Xóa giao dịch chi tiêu
+- Tên: API xóa giao dịch chi tiêu
+- Endpoint: DELETE `/api/expense/:id`
+- Mô tả: Xóa giao dịch chi tiêu từ người dùng trong trường hợp có sai sót khi tạo dữ liệu
+- `Content-type: application/json `
+- **Request body mẫu (có thể để trống)**:
+
+```json
+{
+	
+}
+```
+
+- **Response body**:
+```json
+// Thành công (HTTP Code `200`)
+{
+	"status":"success",
+	"message":"Xóa giao dịch chi tiêu thành công"
+}
+```
+
+```json
+// Trường hợp không tìm thấy người dùng (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Người dùng không tồn tại"
+}
+```
+
+```json
+// Trường hợp mã giao dịch chi tiêu không hợp lệ (HTTP Code `400`)
+{
+	"status": "false",
+    "message": "Mã giao dịch chi tiêu không hợp lệ"
+}
+```
+
+```json
+// Trường hợp mã giao dịch không tồn tại hoặc giao dịch của người dùng người khác  (HTTP Code `404`)
+{
+	"status": "false",
+    "message": "Không tìm thấy giao dịch chi tiêu để xóa"
+}
+```

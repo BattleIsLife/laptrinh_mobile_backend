@@ -8,6 +8,8 @@ import creditAccoutRoute from './credit_account.route.js';
 import assetRoute from './asset.route.js';
 import incomeRoute from './income.route.js';
 import savingRoute from './saving.route.js';
+import expenseRoute from './expense.route.js'
+import categoryExpenseRoute from './expense_category.route.js'
 
 
 const router = Router();
@@ -19,4 +21,6 @@ router.use(creditAccoutRoute);
 router.use(assetRoute);
 router.use(incomeRoute);
 router.use(savingRoute);
+router.use(expenseRoute);
+router.use(categoryExpenseRoute);
 export default router;
