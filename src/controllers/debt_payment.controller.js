@@ -1,4 +1,15 @@
 import DebtPaymentModel from "../models/debt_payment.model";
+const DEBT_PAYMENT_FIELDS = new Set([
+    "debt_payment_id",
+    "payment_date",
+    "due_date",
+    "amount_due",
+    "amount_paid",
+    "is_late",
+    "days_late",
+    "status",
+    "created_at"
+]);
 export const getDebtPayments = async (req, res) => {
     try {
         const debtPayments = await DebtPaymentModel.getDebtPayments();

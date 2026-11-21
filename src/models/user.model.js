@@ -44,7 +44,7 @@ export default class UserModel {
             return null;
         }
 
-        return rows[0] ?? null;
+        return {}
     }
 
     static async updateProfile(userId, changes) {
