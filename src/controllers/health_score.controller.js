@@ -64,13 +64,15 @@ export const calculateHealthScore = async (req, res) => {
         const dti = await calculateDTI(user.id, monthly_income, month, year);
         const saving_rate = await calculateSR(user.id, month, year);
         const emergency_fund_months = await calculateEmergencyFundMonths(user.id, month, year);
-        const health_score = getPointDTI(dti.result)*0.4 + getPointSavingRate(saving_rate.result)*0.4 + getPointEmergencyFundMonths(emergency_fund_months) * 0.2;
+        const cashflow_recent = await calculateRecentCashflow(user.id, month, year);
+        const health_score = getPointDTI(dti.result)*0.3 + getPointSavingRate(saving_rate.result)*0.25 + getPointCashflow(cashflow_recent)*0.25 + getPointEmergencyFundMonths(emergency_fund_months) * 0.2;
         return res.status(200).json({
             status: "success",
             dti: dti,
             saving_rate: saving_rate,
             emergency_fund_months: emergency_fund_months,
             health_score: health_score,
+            cashflow_recent: cashflow_recent,
             message: "Đã tính toán điểm tài chính thành công!!"
         });
     } catch (error) {
@@ -121,6 +123,27 @@ const calculateEmergencyFundMonths = async (user_id, month, year) => {
     return emergencyFundMonths;
 }
 
+
+// Tính toán cashflow
+const calculateRecentCashflow = async (user_id, month, year) => {
+    let cashflow = [];
+    // 3 tháng gần nhất!!
+    for(let i = 0; i < 3; i++)
+    {
+        const sum_expense = await HealthScoreModel.getSumExpense(user_id, month, year);
+        const sum_income = await HealthScoreModel.getSumIncome(user_id, month, year);
+        const cashflow_value = sum_income - sum_expense;
+        cashflow.push(cashflow_value);
+        month--;
+        if(month < 1)
+        {
+            month = 12;
+            year--;
+        }
+    }
+    return cashflow;
+}
+
 const getPointDTI = (dti) => {
     if(dti == 0)
         return 100;
@@ -153,6 +176,23 @@ const getPointEmergencyFundMonths = (emergency_fund_months) => {
     return 0
 }
 
+const getPointCashflow = (cashflow_value) => {
+    let positive = 0;
+    cashflow_value.forEach(element => {
+        if(element >= 0)
+            positive++;
+    });
+    switch (positive) {
+        case 3:
+            return 100;
+        case 2:
+            return 70;
+        case 1:
+            return 40;
+        default:
+            return 0;
+    }
+};
 
 const dtiMessage = (dti) => {
     if(dti <= 30)

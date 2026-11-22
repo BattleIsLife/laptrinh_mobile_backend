@@ -15,7 +15,7 @@ export default class HealhScoreModel {
     }
 
 
-    // Cho Saving Rate
+    // Cho Saving Rate và Cashflow
     static async getSumIncome(user_id, month, year){
         const sql = `SELECT SUM(amount) AS sum_income FROM income_transactions 
                      WHERE user_id = ? AND 
