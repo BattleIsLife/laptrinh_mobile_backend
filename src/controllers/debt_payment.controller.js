@@ -32,3 +32,23 @@ export const getDebtPaymentById = async (req, res) => {
         res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
     }
 }
+export const createDebtPayment = async (req, res) => {
+    try {
+        const debtPaymentData = req.body;
+        const newDebtPayment = await DebtPaymentModel.createDebtPayment(debtPaymentData);
+        res.status(201).json({ status: "success", message: "Tạo thanh toán nợ thành công", data: newDebtPayment });
+    } catch (error) {
+        console.error('Tạo thanh toán nợ thất bại:', error);
+        res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
+}
+export const updateDebtPayment = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const debtPaymentData = req.body;
+        const updatedDebtPayment = await DebtPaymentModel.updateDebtPayment(id, debtPaymentData);
+    }catch (error) {
+        console.error('Cập nhật thanh toán nợ thất bại:', error);
+        res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
+    }
+}

@@ -47,6 +47,19 @@ export default class DebtModel {
     }
     static async updateDebt(id, debtData) {
         const entries = Object.entries(debtData).filter(([field]) => debt_fields.has(field));
-      
+        if (entries.length === 0) {
+            throw new Error("không có trường nào hợp lệ để cập nhật.");
+        }
+        const setClause = entries.map(([field]) => `${field} = ?`).join(", ");
+        const values = entries.map(([, value]) => value);
+        values.push(id);
+        const sql = `UPDATE debts SET ${setClause} WHERE id = ?`;
+        const result = await pool.query(sql, values);
+        return result[0];
+    }
+    static async deleteDebt(id) {
+        const sql = "DELETE FROM debts WHERE id = ?";
+        const result = await pool.query(sql, [id]);
+        return result[0];
     }
 }

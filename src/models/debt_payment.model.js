@@ -36,4 +36,16 @@ export default class DebtPaymentModel {
         const result = await pool.query(sql, values);
         return result[0];
     }
+    static async updateDebtPayment(id, debtPaymentData) {
+        const entries = Object.entries(debtPaymentData).filter(([field]) => debt_payment_fields.has(field));
+        if (entries.length === 0) {
+            throw new Error("không có trường nào hợp lệ để cập nhật.");
+        }
+         const setClause = entries.map(([field]) => `${field} = ?`).join(", ");
+        const values = entries.map(([, value]) => value);
+        values.push(id);
+        const sql = `UPDATE debt_payments SET ${setClause} WHERE debt_payment_id = ?`;
+        const result = await pool.query(sql, values);
+        return result[0];
+    }
 }
