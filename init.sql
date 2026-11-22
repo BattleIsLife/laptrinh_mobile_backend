@@ -30,7 +30,6 @@ CREATE TABLE categories (
   id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name         VARCHAR(100) NOT NULL
                COMMENT 'Ăn uống, Nhà ở, Đi lại, Giải trí...',
-  type         ENUM('INCOME','EXPENSE') NOT NULL,
   icon         VARCHAR(50)  DEFAULT NULL
                COMMENT 'Tên icon Flutter: fastfood, home, work...',
   is_essential BOOLEAN      DEFAULT FALSE
