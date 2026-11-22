@@ -28,7 +28,7 @@ export const getDebtPaymentById = async (req, res) => {
         }
         res.status(200).json({ status: "success", message: "Lấy thanh toán nợ thành công", data: debtPayment });
     } catch (error) {
-        console.error('Lay thanh toán nợ thất bại:', error);
+        console.error('Lấy thanh toán nợ thất bại:', error);
         res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
     }
 }

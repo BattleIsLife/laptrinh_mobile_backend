@@ -1,6 +1,6 @@
 import pool from "../config/database";
 const debt_fields = new Set([
- "id",
+"id",
 "user_id",
 "lender_name",
 "debt_type",
@@ -14,10 +14,8 @@ const debt_fields = new Set([
 "due_day_of_month",
 "status",
 "created_at",
- "updated_at"
-               
+"updated_at"            
 ]);
-
 export default class DebtModel {
     static async getDebts() {
         const sql = "select * from debts";
@@ -28,5 +26,27 @@ export default class DebtModel {
         const sql = "select * from debts where id = ?";
         const rows = await pool.query(sql, [id]);
         return rows[0][0];
+    }
+    static async createDebt(debtData) {
+        const sql = 'INSERT INTO debts (user_id, lender_name, debt_type, total_amount, remaining_amount, credit_limit, monthly_payment, interest_rate, start_date, end_date, due_day_of_month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const values = [
+            debtData.user_id,
+            debtData.lender_name,
+            debtData.debt_type,
+            debtData.total_amount,
+            debtData.remaining_amount,
+            debtData.credit_limit,
+            debtData.monthly_payment,
+            debtData.interest_rate,
+            debtData.start_date,
+            debtData.end_date,
+            debtData.due_day_of_month
+        ];
+        const result = await pool.query(sql, values);
+        return result[0];
+    }
+    static async updateDebt(id, debtData) {
+        const entries = Object.entries(debtData).filter(([field]) => debt_fields.has(field));
+      
     }
 }
