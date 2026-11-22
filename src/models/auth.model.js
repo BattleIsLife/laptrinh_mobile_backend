@@ -16,6 +16,6 @@ export default class AuthModel {
     static async createUser(full_name, email, phone, password) {
         const sql = "INSERT INTO users (full_name, email, phone, password_hash) VALUES (?, ?, ?, ?)";
         const [result] = await dbPool.execute(sql, [full_name, email, phone, password]);
-        return result.insertedId;
+        return result.insertId;
     }
 }
