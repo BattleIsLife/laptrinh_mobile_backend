@@ -63,10 +63,14 @@ export const calculateHealthScore = async (req, res) => {
     try {
         const dti = await calculateDTI(user.id, monthly_income, month, year);
         const saving_rate = await calculateSR(user.id, month, year);
+        const emergency_fund_months = await calculateEmergencyFundMonths(user.id, month, year);
+        const health_score = getPointDTI(dti.result)*0.4 + getPointSavingRate(saving_rate.result)*0.4 + getPointEmergencyFundMonths(emergency_fund_months) * 0.2;
         return res.status(200).json({
             status: "success",
             dti: dti,
             saving_rate: saving_rate,
+            emergency_fund_months: emergency_fund_months,
+            health_score: health_score,
             message: "Đã tính toán điểm tài chính thành công!!"
         });
     } catch (error) {
@@ -92,6 +96,7 @@ const calculateSR = async (user_id, month, year) => {
     const sum_income = await HealthScoreModel.getSumIncome(user_id, month, year);
     const sum_expense = await HealthScoreModel.getSumExpense(user_id, month, year);
     let saving_rate = 100;
+    
     if(sum_income !== 0)
     {
         saving_rate = (sum_income - sum_expense) / sum_income;
@@ -100,6 +105,52 @@ const calculateSR = async (user_id, month, year) => {
         result: saving_rate,
         message: savingRateMessage(saving_rate)
     };
+}
+
+
+// Tính toán số tháng quỹ khẩn cấp
+const calculateEmergencyFundMonths = async (user_id, month, year) => {
+    const sum_saving = await HealthScoreModel.getSumSaving(user_id, month, year);
+    const sum_asset = await HealthScoreModel.getSumMoneyAssets(user_id, month, year);
+    const sum_essential_expense = await HealthScoreModel.getSumEssentialExpense(user_id, month, year);
+    let emergencyFundMonths = 0;
+    if(sum_essential_expense > 0)
+    {
+        emergencyFundMonths = (sum_asset + sum_saving) / emergencyFundMonths;
+    }
+    return emergencyFundMonths;
+}
+
+const getPointDTI = (dti) => {
+    if(dti == 0)
+        return 100;
+    if(dti < 20)
+        return 90;
+    if(dti < 35)
+        return 40;
+    return 10;
+}
+
+const getPointSavingRate = (sr) => {
+    if(sr > 35)
+        return 100;
+    if(sr > 20)
+        return 85;
+    if(sr > 10)
+        return 50;
+    return 0
+}
+
+const getPointEmergencyFundMonths = (emergency_fund_months) => {
+    if(emergency_fund_months >= 6)
+        return 100;
+    if(emergency_fund_months >= 3)
+        return 85;
+    if(emergency_fund_months >= 1)
+        return 50;
+    if(emergency_fund_months > 0)
+        return 20;
+    return 0
 }
 
 
