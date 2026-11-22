@@ -33,4 +33,8 @@ export default class HealhScoreModel {
         const [rows] = await pool.execute(sql, [user_id, month, year])
         return rows[0].sum_expense ?? 0;
     }
+
+
+    // Cho CUR (Để sau)
+
 }

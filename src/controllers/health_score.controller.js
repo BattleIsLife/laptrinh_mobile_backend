@@ -1,5 +1,5 @@
 import UserModel from "../models/user.model.js";
-import CreditScoreModel from "../models/health_score.model.js";
+import HealthScoreModel from "../models/health_score.model.js";
 
 const isValidId = (id) => {
     const parsedId = String(id);
@@ -62,9 +62,11 @@ export const calculateHealthScore = async (req, res) => {
 
     try {
         const dti = await calculateDTI(user.id, monthly_income, month, year);
+        const saving_rate = await calculateSR(user.id, month, year);
         return res.status(200).json({
             status: "success",
             dti: dti,
+            saving_rate: saving_rate,
             message: "Đã tính toán điểm tài chính thành công!!"
         });
     } catch (error) {
@@ -77,7 +79,7 @@ export const calculateHealthScore = async (req, res) => {
 
 // Tính toán DTI (chỉ trả về số và thông báo)
 const calculateDTI = async (user_id, monthly_income, month, year) => {
-    const monthly_payment = await CreditScoreModel.getSumMonthlyPayment(user_id, month, year);
+    const monthly_payment = await HealthScoreModel.getSumMonthlyPayment(user_id, month, year);
     const dti = monthly_payment / monthly_income * 100;
     return {
         result: dti,
@@ -87,7 +89,17 @@ const calculateDTI = async (user_id, monthly_income, month, year) => {
 
 // Tính toán savingRate
 const calculateSR = async (user_id, month, year) => {
-    
+    const sum_income = await HealthScoreModel.getSumIncome(user_id, month, year);
+    const sum_expense = await HealthScoreModel.getSumExpense(user_id, month, year);
+    let saving_rate = 100;
+    if(sum_income !== 0)
+    {
+        saving_rate = (sum_income - sum_expense) / sum_income;
+    }
+    return {
+        result: saving_rate,
+        message: savingRateMessage(saving_rate)
+    };
 }
 
 
@@ -106,5 +118,13 @@ const dtiMessage = (dti) => {
 }
 
 const savingRateMessage = (sr) => {
-
+    if(sr >= 20)
+    {
+        return "Bạn đang chi tiêu lành mạnh, cứ thế phát huy!!";
+    }
+    if (sr >= 0)
+    {
+        return "Hãy chú ý chi tiêu của bạn nhiều hơn!!";
+    }
+    return "Chi tiêu của bạn đang ở mức nguy hiểm!!";
 }
