@@ -12,6 +12,9 @@ import expenseRoute from './expense.route.js'
 import categoryExpenseRoute from './expense_category.route.js'
 
 
+import healthScoreRoute from './health_score.route.js'
+
+
 const router = Router();
 router.use(checkHealthRoute);
 router.use(profileRoute);
@@ -23,4 +26,6 @@ router.use(incomeRoute);
 router.use(savingRoute);
 router.use(expenseRoute);
 router.use(categoryExpenseRoute);
+
+router.use(healthScoreRoute);
 export default router;
