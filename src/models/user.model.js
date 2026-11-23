@@ -44,7 +44,7 @@ export default class UserModel {
             return null;
         }
 
-        return {}
+        return profile;
     }
 
     static async updateProfile(userId, changes) {

@@ -1,5 +1,5 @@
 import pool from "../config/database";
-const debt_fields = new Set([
+const DEBT_FIELDS = new Set([
 "id",
 "user_id",
 "lender_name",
@@ -35,18 +35,18 @@ export default class DebtModel {
             debtData.debt_type,
             debtData.total_amount,
             debtData.remaining_amount,
-            debtData.credit_limit,
+            debtData.credit_limit ?? 0,
             debtData.monthly_payment,
-            debtData.interest_rate,
+            debtData.interest_rate ?? 0,
             debtData.start_date,
-            debtData.end_date,
-            debtData.due_day_of_month
+            debtData.end_date ?? null,
+            debtData.due_day_of_month ?? 1
         ];
         const result = await pool.query(sql, values);
         return result[0];
     }
     static async updateDebt(id, debtData) {
-        const entries = Object.entries(debtData).filter(([field]) => debt_fields.has(field));
+        const entries = Object.entries(debtData).filter(([field]) => DEBT_FIELDS.has(field));
         if (entries.length === 0) {
             throw new Error("không có trường nào hợp lệ để cập nhật.");
         }
