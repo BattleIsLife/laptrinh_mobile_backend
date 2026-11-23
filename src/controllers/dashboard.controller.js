@@ -1,0 +1,1 @@
+import dashboardmodel from '../models/dashboard.model.js';

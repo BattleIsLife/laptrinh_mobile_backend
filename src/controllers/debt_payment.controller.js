@@ -47,6 +47,7 @@ export const updateDebtPayment = async (req, res) => {
         const id = req.params.id;
         const debtPaymentData = req.body;
         const updatedDebtPayment = await DebtPaymentModel.updateDebtPayment(id, debtPaymentData);
+        res.status(200).json({ status: "success", message: "Cập nhật thanh toán nợ thành công", data: updatedDebtPayment });
     }catch (error) {
         console.error('Cập nhật thanh toán nợ thất bại:', error);
         res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });

@@ -33,7 +33,7 @@ export default class UserModel {
     }
      static async getProfile(userId) {
         const [rows] = await pool.execute(
-            `SELECT id, full_name, date_of_birth, occupation, number_of_dependents,
+            `SELECT id, full_name, phone, email, date_of_birth, occupation, number_of_dependents,
                     monthly_income, created_at, updated_at
              FROM users
              WHERE id = ?`,
@@ -50,7 +50,7 @@ export default class UserModel {
     static async updateProfile(userId, changes) {
         const entries = Object.entries(changes).filter(([field]) => PROFILE_FIELDS.has(field));
         if (entries.length === 0) {
-            throw new Error('At least one valid profile field is required');
+            throw new Error('Không có trường hợp lệ nào để cập nhật.');
         }
 
         const setClause = entries.map(([field]) => `${field} = ?`).join(', ');
