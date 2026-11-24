@@ -278,7 +278,9 @@ CREATE TABLE recommendations (
   id              BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id         BIGINT UNSIGNED NOT NULL,
   credit_score_id BIGINT UNSIGNED DEFAULT NULL
-                  COMMENT 'Link với lần tính điểm nào sinh ra gợi ý này',
+                  COMMENT 'Link với lần tính điểm tín dụng nào sinh ra gợi ý này',
+  financial_score_id BIGINT UNSIGNED DEFAULT NULL
+                  COMMENT 'Link với lần tính điểm sức khỏe tài chính nào sinh ra gợi ý này',
   type            ENUM('PAYMENT','DEBT','SAVING',
                        'INCOME','UTILIZATION','AGE') NOT NULL,
   title           VARCHAR(200)    NOT NULL,
@@ -287,7 +289,8 @@ CREATE TABLE recommendations (
   is_read         BOOLEAN         DEFAULT FALSE,
   created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id)         REFERENCES users(id)         ON DELETE CASCADE,
-  FOREIGN KEY (credit_score_id) REFERENCES credit_scores(id) ON DELETE SET NULL
+  FOREIGN KEY (credit_score_id) REFERENCES credit_scores(id) ON DELETE SET NULL,
+  FOREIGN KEY (financial_score_id) REFERENCES financial_scores(id) ON DELETE SET NULL
 ) ENGINE=InnoDB COMMENT='Gợi ý cải thiện điểm tín dụng';
 
 -- ================================================
