@@ -61,6 +61,19 @@ export const calculateHealthScore = async (req, res) => {
                               cashflow_recent.result !== null && emergency_fund_months.result !== null) 
                             ? getPointDTI(dti.result)*0.3 + getPointSavingRate(saving_rate.result)*0.25 + getPointCashflow(cashflow_recent.result)*0.25 + getPointEmergencyFundMonths(emergency_fund_months.result) * 0.2 
                             : null;
+        
+        if(health_score !== null)
+        {
+            await HealthScoreModel.addSnapshot(user.id, health_score, 
+                                                        getHealthScoreRisk(health_score), 
+                                                        getPointSavingRate(saving_rate.result), 
+                                                        getPointDTI(dti.result),
+                                                        getPointCashflow(cashflow_recent.result),
+                                                        getPointEmergencyFundMonths(emergency_fund_months.result),
+                                                        saving_rate.result,
+                                                        emergency_fund_months.result
+                                                    );
+        }
 
         return res.status(200).json({
             status: "success",
@@ -307,4 +320,12 @@ const getPointEmergencyFundMonthsMessage = (months) => {
         return "Bạn chưa có khoản dự phòng được ghi nhận. Hãy bắt đầu xây dựng quỹ khẩn cấp bằng những khoản tích lũy nhỏ, phù hợp với khả năng tài chính."
     if(months >= 6)
         return "Quỹ dự phòng hiện tại có khả năng đáp ứng chi phí thiết yếu trong ít nhất 6 tháng. Hãy tiếp tục duy trì và bảo toàn khoản dự phòng này."
+}
+
+const getHealthScoreRisk = (score) => {
+    if (score >= 66)
+        return "LOW";
+    if (score >= 33)
+        return "MEDIUM";
+    return "HIGH";
 }

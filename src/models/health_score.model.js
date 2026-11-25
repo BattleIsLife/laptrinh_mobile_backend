@@ -52,6 +52,27 @@ export default class HealhScoreModel {
         return rows[0].sum_saving ?? 0;
     }
 
-    // Cho CUR (Maybe)
+    // Thêm snapshot
+    static async addSnapshot(user_id, score, risk_level, savings_score, 
+                                                  debt_score,
+                                                  cashflow_score,
+                                                  stability_score, //Điểm của emergency_fund_months
+                                                  savings_rate,
+                                                  emergency_fund_months){
+        const sql = `INSERT INTO financial_scores(user_id, score, risk_level, savings_score, 
+                                                                       debt_score, 
+                                                                       cashflow_score, 
+                                                                       stability_score, 
+                                                                       savings_rate, 
+                                                                       emergency_fund_months)
+                                           VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const [rows] = await pool.execute(sql, [user_id, score, risk_level, savings_score, 
+                                                  debt_score,
+                                                  cashflow_score,
+                                                  stability_score, //Điểm của emergency_fund_months
+                                                  savings_rate,
+                                                  emergency_fund_months]);
+        return rows.insertId ?? null;
+    }
 
 }
