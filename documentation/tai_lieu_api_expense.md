@@ -114,7 +114,7 @@
 - Tên: API lấy danh sách chi tiêu của người dùng
 - Endpoint: GET `/api/expense/` 
 (Query String: page mặc định là 0, khoảng thời gian lấy dữ liệu mặc định là tháng này năm này, vd: /api/income?page=1&month=11&year=2026)
-- Mô tả: Lấy danh sách các giao dịch chi tiêu của người dùng, có giới hạn về số bản ghi mỗi lần lấy 
+- Mô tả: Lấy danh sách các giao dịch chi tiêu của người dùng từ mới nhất đến cũ nhất trong tháng, giới hạn 10 bản ghi mỗi trang
 - `Content-type: application/json `
 - **Request body mẫu (có thể để trống, chủ yếu gửi phạm vi cần lấy dữ liệu qua Query String)**:
 
@@ -154,7 +154,11 @@
         }
 
     ], 
-    "total_items": 3 // số bản ghi tìm thấy được
+    "pagination":{
+        "current_page": 0, // trang hiện tại
+        "total_items": 3, // số bản ghi tìm thấy đc
+        "total_pages": 1 // số trang 
+    },
 }
 ```
 

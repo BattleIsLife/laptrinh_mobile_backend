@@ -167,24 +167,38 @@ export const getIncomeTransactions = async (req, res) => {
             });
         }
         const { page, month, year } = req.query;
-
+        const items_per_page = 10; // chú ý giá trị cần giống trong Model
         // Kiểm tra xem page trên query string có phải số thật ko
         if (Number.isFinite(Number(page))) {
             const transactions_data = await IncomeModel.getAllIncomeTransactions(user_id, page, month, year);
+            const total_items = transactions_data.length;
+            const total_num_of_transactions = await IncomeModel.getTotalNumberOfTransactions(user_id, page, month, year);
+            const total_pages = Math.ceil(total_num_of_transactions/items_per_page);
             return res.status(200).send({
                 status: "success",
                 message: "Lấy danh sách thu nhập thành công",
                 data: transactions_data,
-                total_items: transactions_data.length
+                pagination: {
+                    current_page: Number(page),
+                    total_items: total_items,
+                    total_pages: total_pages
+                }
             });
         } else {
             // Không phải số thì mặc định dùng page = 0
             const transactions_data = await IncomeModel.getAllIncomeTransactions(user_id, 0, month, year);
+            const total_items = transactions_data.length;
+            const total_num_of_transactions = await IncomeModel.getTotalNumberOfTransactions(user_id, page, month, year);
+            const total_pages = Math.ceil(total_num_of_transactions/items_per_page);
             return res.status(200).send({
                 status: "success",
                 message: "Lấy danh sách thu nhập thành công",
                 data: transactions_data,
-                total_items: transactions_data.length
+                pagination: {
+                    current_page: 0,
+                    total_items: total_items,
+                    total_pages: total_pages
+                }
             });
         }
 

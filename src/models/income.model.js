@@ -6,9 +6,16 @@ export default class IncomeModel {
     static async getAllIncomeTransactions(user_id, page = 0, month = now.getMonth() + 1, year = now.getFullYear()) {
         const offset = page * 10;
         const sql = "SELECT id, amount, source, income_type, DATE_FORMAT(transaction_date, '%Y-%m-%d') as transaction_date, description" +
-            " FROM income_transactions WHERE user_id = ? AND MONTH(transaction_date) = ? AND YEAR(transaction_date) = ? LIMIT 10 OFFSET ?";
+            " FROM income_transactions WHERE user_id = ? AND MONTH(transaction_date) = ? AND YEAR(transaction_date) = ? ORDER BY transaction_date DESC" + 
+            " LIMIT 10 OFFSET ?";
         const [rows] = await dbPool.execute(sql, [user_id, month, year, offset]);
         return rows;
+    }
+    static async getTotalNumberOfTransactions(user_id, page = 0, month = now.getMonth() + 1, year = now.getFullYear()) {
+       const offset = page * 10;
+        const sql = "SELECT COUNT(id) as count FROM income_transactions WHERE user_id = ? AND MONTH(transaction_date) = ? AND YEAR(transaction_date) = ?"
+        const [rows] = await dbPool.execute(sql, [user_id, month, year, offset]);
+        return rows[0].count; 
     }
     static async getIncomeTransaction(id, user_id) {
         const sql = "SELECT id, amount, source, income_type, DATE_FORMAT(transaction_date, '%Y-%m-%d') as transaction_date, description"
