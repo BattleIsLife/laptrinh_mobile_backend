@@ -44,13 +44,11 @@ export default class HealhScoreModel {
         return rows[0].sum_expense ?? 0;
     }
 
-    static async getSumSaving(user_id, month, year){
+    static async getSumSaving(user_id){
         const sql = `SELECT SUM(current_amount) AS sum_saving FROM savings 
                      WHERE user_id = ? AND 
-                     MONTH(target_date) <= ? AND 
-                     YEAR(target_date) <= ? AND 
                      status = 'ACTIVE'`;
-        const [rows] = await pool.execute(sql, [user_id, month, year])
+        const [rows] = await pool.execute(sql, [user_id])
         return rows[0].sum_saving ?? 0;
     }
 

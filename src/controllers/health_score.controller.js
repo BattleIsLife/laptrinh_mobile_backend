@@ -109,7 +109,7 @@ const calculateSR = async (user_id, month, year) => {
 
 // Tính toán số tháng quỹ khẩn cấp
 const calculateEmergencyFundMonths = async (user_id, month, year) => {
-    const sum_saving = await HealthScoreModel.getSumSaving(user_id, month, year);
+    const sum_saving = await HealthScoreModel.getSumSaving(user_id);
     const sum_essential_expense = await HealthScoreModel.getSumEssentialExpense(user_id, month, year);
     let emergency_fund_months = null;
     if(sum_essential_expense > 0 && sum_saving > 0)
