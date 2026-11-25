@@ -8,7 +8,8 @@ router.use(verifyToken);
 
 router.post("/api/debts", createDebt);
 router.get("/api/debts", getDebts);
-router.get("/api/debts/:id", getDebtById);
+router.get("/api/debts/:userid", getDebts);
+router.get("/api/debts/:userid/:id", getDebtById);
 router.patch("/api/debts/:id", updateDebt);
 router.delete("/api/debts/:id", deleteDebt);
 

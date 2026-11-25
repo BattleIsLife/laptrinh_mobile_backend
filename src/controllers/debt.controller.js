@@ -135,9 +135,20 @@ export const getDebts = async (req, res) => {
     if (!isValidId(userId)) {
         return res.status(401).json({ status: "false", message: "Token không chứa ID người dùng hợp lệ" });
     }
+    const requestedUserId = req.params.userid ?? userId;
+    if (!isValidId(requestedUserId)) {
+        return invalidRequest(res, { userid: "ID người dùng không hợp lệ" });
+    }
+    if (String(requestedUserId) !== String(userId)) {
+        return res.status(403).json({
+            status: "false",
+            code: "FORBIDDEN",
+            message: "Không có quyền truy cập dữ liệu người dùng này"
+        });
+    }
 
     try {
-        const debts = await DebtModel.getDebts(userId);
+        const debts = await DebtModel.getDebts(requestedUserId);
         return res.status(200).json({ status: "success", data: debts });
     } catch (error) {
         console.error("Failed to get debts:", error);
@@ -150,12 +161,22 @@ export const getDebtById = async (req, res) => {
     if (!isValidId(userId)) {
         return res.status(401).json({ status: "false", message: "Token không chứa ID người dùng hợp lệ" });
     }
+    if (!isValidId(req.params.userid)) {
+        return invalidRequest(res, { userid: "ID người dùng không hợp lệ" });
+    }
+    if (String(req.params.userid) !== String(userId)) {
+        return res.status(403).json({
+            status: "false",
+            code: "FORBIDDEN",
+            message: "Không có quyền truy cập dữ liệu người dùng này"
+        });
+    }
     if (!isValidId(req.params.id)) {
         return invalidRequest(res, { id: "ID khoản nợ không hợp lệ" });
     }
 
     try {
-        const debt = await DebtModel.getDebtById(req.params.id, userId);
+        const debt = await DebtModel.getDebtById(req.params.id, req.params.userid);
         if (!debt) {
             return res.status(404).json({ status: "false", message: "Không tìm thấy khoản nợ" });
         }
