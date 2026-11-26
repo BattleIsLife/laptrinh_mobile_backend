@@ -1,5 +1,9 @@
 import pool from "../config/database.js";
-import { dateToString } from "../utils/debt_validation.js";
+import {
+    dateToString,
+    fromMinorUnits,
+    toMinorUnits
+} from "../utils/debt_validation.js";
 
 const DEBT_UPDATE_FIELDS = new Set([
     "lender_name",
@@ -65,9 +69,20 @@ export default class DebtModel {
     }
 
     static async createDebt(userId, debtData) {
-        const remainingAmount = Number(debtData.remaining_amount);
-        const status = remainingAmount === 0 ? "SETTLED" : "ACTIVE";
-        const [result] = await pool.execute(
+        const connection = await pool.getConnection();
+        let transactionStarted = false;
+        try {
+            await connection.beginTransaction();
+            transactionStarted = true;
+        const remainingAmount = toMinorUnits(debtData.remaining_amount);
+        const monthlyPayment = toMinorUnits(debtData.monthly_payment);
+        if (remainingAmount > 0n && monthlyPayment <= 0n) {
+            const error = new Error("monthly_payment phải lớn hơn 0 khi còn dư nợ");
+            error.code = "INVALID_MONTHLY_PAYMENT";
+            throw error;
+        }
+        const status = remainingAmount === 0n ? "SETTLED" : "ACTIVE";
+        const [result] = await connection.execute(
             `INSERT INTO debts (
                 user_id, lender_name, debt_type, total_amount, remaining_amount,
                 credit_limit, monthly_payment, interest_rate, start_date, end_date,
@@ -88,7 +103,60 @@ export default class DebtModel {
                 status
             ]
         );
-        return this.getDebtById(result.insertId, userId);
+            if (remainingAmount > 0n) {
+                const debtId = result.insertId;
+                const dueDay = Number(debtData.due_day_of_month ?? 1);
+                const startDate = new Date(`${debtData.start_date}T00:00:00Z`);
+                const endDate = debtData.end_date
+                    ? new Date(`${debtData.end_date}T00:00:00Z`)
+                    : null;
+                let scheduledRemaining = remainingAmount;
+                let year = startDate.getUTCFullYear();
+                let month = startDate.getUTCMonth() + 1;
+
+                while (scheduledRemaining > 0n) {
+                    const firstDayNextMonth = new Date(Date.UTC(year, month, 1));
+                    year = firstDayNextMonth.getUTCFullYear();
+                    month = firstDayNextMonth.getUTCMonth();
+
+                    const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+                    const dueDate = new Date(Date.UTC(year, month, Math.min(dueDay, lastDay)));
+                    if (endDate && dueDate > endDate) {
+                        break;
+                    }
+
+                    const amountDue = scheduledRemaining < monthlyPayment
+                        ? scheduledRemaining
+                        : monthlyPayment;
+                    await connection.execute(
+                        `INSERT INTO debt_payments (debt_id, due_date, amount_due)
+                         VALUES (?, ?, ?)`,
+                        [
+                            debtId,
+                            dueDate.toISOString().slice(0, 10),
+                            fromMinorUnits(amountDue)
+                        ]
+                    );
+                    scheduledRemaining -= amountDue;
+
+                    if (!endDate && scheduledRemaining === 0n) {
+                        break;
+                    }
+                    month += 1;
+                }
+            }
+
+            await connection.commit();
+            transactionStarted = false;
+            return this.getDebtById(result.insertId, userId);
+        } catch (error) {
+            if (transactionStarted) {
+                await connection.rollback();
+            }
+            throw error;
+        } finally {
+            connection.release();
+        }
     }
 
     static async updateDebt(id, userId, changes) {

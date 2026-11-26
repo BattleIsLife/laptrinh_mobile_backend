@@ -6,14 +6,34 @@ export default class DebtPaymentModel {
     static async getDebtPayments(userId) {
         await DebtModel.refreshStatuses(userId);
         const [rows] = await pool.execute(
-            `SELECT payment.*
+            `SELECT payment.*, debt.due_day_of_month
              FROM debt_payments AS payment
              JOIN debts AS debt ON debt.id = payment.debt_id
              WHERE debt.user_id = ?
-             ORDER BY payment.due_date DESC, payment.id DESC`,
+             ORDER BY payment.due_date ASC, payment.id ASC`,
             [userId]
         );
-        return rows;
+       const now = new Date();
+        const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+        const toDateString = (value) => value instanceof Date
+            ? `${value.getUTCFullYear()}-${String(value.getUTCMonth() + 1).padStart(2, "0")}-${String(value.getUTCDate()).padStart(2, "0")}`
+            : String(value).slice(0, 10);
+        return rows.filter((payment) => {
+            const dueDay = Number(payment.due_day_of_month);
+            let cutoffYear = today.getUTCFullYear();
+            let cutoffMonth = today.getUTCMonth();
+            if (today.getUTCDate() > dueDay) {
+                cutoffMonth += 1;
+                if (cutoffMonth > 11) {
+                    cutoffMonth = 0;
+                    cutoffYear += 1;
+                }
+            }
+            const lastDay = new Date(Date.UTC(cutoffYear, cutoffMonth + 1, 0)).getUTCDate();
+            const cutoffDay = Math.min(dueDay, lastDay);
+            const cutoff = `${cutoffYear}-${String(cutoffMonth + 1).padStart(2, "0")}-${String(cutoffDay).padStart(2, "0")}`;
+            return toDateString(payment.due_date) <= cutoff;
+        });
     }
 
     static async getDebtPaymentById(id, userId) {
@@ -47,7 +67,17 @@ export default class DebtPaymentModel {
                 transactionStarted = false;
                 return null;
             }
-
+            const [duplicateRows] = await connection.execute(
+                `SELECT id FROM debt_payments
+                 WHERE debt_id = ? AND due_date = ?
+                 LIMIT 1`,
+                [debtId, paymentData.due_date]
+            );
+            if (duplicateRows.length > 0) {
+                const error = new Error("Đã tồn tại kỳ thanh toán cho ngày đến hạn này");
+                error.code = "DUPLICATE_PAYMENT_SCHEDULE";
+                throw error;
+            }
             const [scheduledRows] = await connection.execute(
                 `SELECT COALESCE(SUM(amount_due - amount_paid), 0) AS scheduled_amount
                  FROM debt_payments

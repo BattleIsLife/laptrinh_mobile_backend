@@ -3,7 +3,8 @@ import {
     createDebtPayment,
     getDebtPayments,
     getDebtPaymentById,
-    recordDebtPayment
+    recordDebtPayment,
+    refreshDebtPayments
 } from "../controllers/debt_payment.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -13,6 +14,7 @@ router.use(verifyToken);
 
 router.post("/api/debts/:debtId/payments", createDebtPayment);
 router.get("/api/debt-payments", getDebtPayments);
+router.post("/api/debt-payments/refresh-statuses", refreshDebtPayments);
 router.get("/api/debt-payments/:id", getDebtPaymentById);
 router.patch("/api/debt-payments/:id", recordDebtPayment);
 

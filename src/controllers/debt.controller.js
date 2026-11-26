@@ -111,6 +111,10 @@ const validateDebtRelationships = (debt) => {
     if (debt.debt_type !== "CREDIT_CARD" && toMinorUnits(debt.credit_limit || 0) > 0n) {
         errors.credit_limit = "credit_limit chỉ được sử dụng cho debt_type CREDIT_CARD";
     }
+    if (toMinorUnits(debt.remaining_amount) > 0n
+        && toMinorUnits(debt.monthly_payment) <= 0n) {
+        errors.monthly_payment = "monthly_payment phải lớn hơn 0 khi khoản nợ còn dư";
+    }
 
     return errors;
 };
@@ -210,6 +214,9 @@ export const createDebt = async (req, res) => {
             data: debt
         });
     } catch (error) {
+        if (error.code === "INVALID_MONTHLY_PAYMENT") {
+            return invalidRequest(res, { monthly_payment: error.message });
+        }
         console.error("Failed to create debt:", error);
         return serverError(res);
     }

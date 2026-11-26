@@ -70,6 +70,24 @@ const validatePaymentRecord = (body) => {
     return { errors, amount_paid: body.amount_paid };
 };
 
+export const refreshDebtPayments = async (req, res) => {
+    const userId = req.user?.id;
+    if (!isValidId(userId)) {
+        return res.status(401).json({ status: "false", message: "Token không chứa ID người dùng hợp lệ" });
+    }
+    try {
+        await DebtModel.refreshStatuses(userId);
+        return res.status(200).json({ status: "success", message: "Cập nhật trạng thái các kỳ thanh toán thành công" });
+    } catch (error) {
+        console.error("lam moi trạng thái các kỳ thanh toán that bai:", error);
+        return res.status(500).json({
+            status: "false",
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Có lỗi ở phía máy chủ"
+        });
+    }
+}
+
 export const getDebtPayments = async (req, res) => {
     const userId = req.user?.id;
     if (!isValidId(userId)) {
@@ -170,6 +188,13 @@ export const createDebtPayment = async (req, res) => {
         });
     } catch (error) {
         if (error.code === "SCHEDULE_EXCEEDS_BALANCE") {
+            return res.status(409).json({
+                status: "false",
+                code: error.code,
+                message: error.message
+            });
+        }
+        if (error.code === "DUPLICATE_PAYMENT_SCHEDULE") {
             return res.status(409).json({
                 status: "false",
                 code: error.code,
