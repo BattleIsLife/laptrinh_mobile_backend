@@ -11,12 +11,6 @@ export default class ExpenseModel {
         const [rows] = await dbPool.execute(sql, [user_id, month, year, offset]);
         return rows;
     }
-    static async getTotalNumberOfTransactions(user_id, page = 0, month = now.getMonth() + 1, year = now.getFullYear()) {
-       const offset = page * 10;
-        const sql = "SELECT COUNT(id) as count FROM expense_transactions WHERE user_id = ? AND MONTH(transaction_date) = ? AND YEAR(transaction_date) = ?"
-        const [rows] = await dbPool.execute(sql, [user_id, month, year, offset]);
-        return rows[0].count; 
-    }
     static async getExpenseTransaction(id, user_id) {
         const sql = "SELECT et.id, et.amount, c.id as category_id, c.name as category_name, DATE_FORMAT(et.transaction_date, '%Y-%m-%d') as transaction_date, et.description"+ 
         " FROM expense_transactions et LEFT JOIN categories c ON et.category_id = c.id WHERE et.id = ? AND et.user_id = ?";
