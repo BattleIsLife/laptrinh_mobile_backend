@@ -109,7 +109,7 @@ export const calculateCreditScore = async (req, res) => {
             const insertId = await CreditScoreModel.saveCreditScore(credit_score_data);
             if (insertId) {
                 // Lưu các khuyến nghị vào CSDL (cần xem xét lại các type trong recommendations)
-                
+
                 return res.status(201).send({
                     status: "success",
                     message: "Tính điểm tín dụng thành công",
@@ -131,12 +131,29 @@ export const calculateCreditScore = async (req, res) => {
 
 export const getCreditScore = async (req, res) => {
     try {
+        // Kiểm tra người dùng có tồn tại
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        const credit_score_data = await CreditScoreModel.getCreditScore(user_id);
+        if (credit_score_data) {
+            return res.status(200).send({
+                status: "success",
+                message: "Lấy kết quả điểm tín dụng thành công",
+                data: credit_score_data
+            });
+        } else {
+            return res.status(404).send({
+                status: "false",
+                message: "Không tìm thấy dữ liệu điểm tín dụng"
+            });
+        }
 
-        return res.status(200).send({
-            status: "success",
-            message: "Lấy kết quả điểm tín dụng thành công",
-            data: {}
-        });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ status: "false", message: "Có lỗi ở phía máy chủ" });
@@ -145,11 +162,20 @@ export const getCreditScore = async (req, res) => {
 
 export const getCreditScoreHistory = async (req, res) => {
     try {
-
+        // Kiểm tra người dùng có tồn tại
+        const user_id = parseInt(req.user.id);
+        const profile = await UserModel.getProfile(user_id);
+        if (!profile) {
+            return res.status(404).json({
+                status: "false",
+                message: 'Người dùng không tồn tại'
+            });
+        }
+        const credit_score_history = await CreditScoreModel.getCreditScoreHistory(user_id);
         return res.status(200).send({
             status: "success",
             message: "Lấy lịch sử điểm tín dụng thành công",
-            data: {}
+            data: calculateScoreChange(credit_score_history)
         });
     } catch (error) {
         console.log(error.message);
@@ -382,4 +408,18 @@ function convertNewApplicationScore(new_application) {
             priority: "MEDIUM"
         };
     }
+}
+
+function calculateScoreChange(credit_score_history){
+    console.log(credit_score_history);
+    if(credit_score_history.length == 0){
+        return credit_score_history;
+    }
+    for (let i = 0; i < credit_score_history.length - 1; i++){
+        // Điểm thay đổi bằng điểm hiện tại trừ đi điểm lần đánh giá trước
+        credit_score_history[i].change = credit_score_history[i].score - credit_score_history[i+1].score;
+    }
+    // Lần đánh giá cũ nhất ko có điểm trước nó để so sánh nên để change là 0
+     credit_score_history[credit_score_history.length - 1].change = 0;
+     return credit_score_history;
 }

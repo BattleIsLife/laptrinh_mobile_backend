@@ -70,11 +70,17 @@ export default class ExpenseCategoryModel {
     static async addCreditScoreRecommendation(data) {
         
     }
-    static async getCreditScore(data) {
-
+    static async getCreditScore(user_id) {
+        const sql = "SELECT * FROM credit_scores WHERE user_id = ? AND" +  
+        " calculated_at = (SELECT MAX(calculated_at) FROM credit_scores WHERE user_id = ?) ORDER BY calculated_at DESC";
+        const [rows] = await dbPool.execute(sql, [user_id, user_id]);
+        return rows[0];
     }
     static async getCreditScoreHistory(user_id) {
-
+        const sql = "SELECT score, score_tier, score_breakdown, model_version, calculated_at" +
+        " FROM credit_scores WHERE user_id = ? ORDER BY calculated_at DESC LIMIT 5 OFFSET 0";
+        const [rows] = await dbPool.execute(sql, [user_id]);
+        return rows;
     }
     static async getCreditScoreRecommendation(score_id) {
 
