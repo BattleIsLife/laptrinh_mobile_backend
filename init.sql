@@ -204,8 +204,6 @@ CREATE TABLE credit_scores (
                   COMMENT 'Điểm tín dụng 300–850',
   score_tier      ENUM('POOR','FAIR','GOOD',
                        'VERY_GOOD','EXCELLENT') NOT NULL,
-  dti_ratio       DECIMAL(5,2)    NOT NULL
-                  COMMENT 'Tỷ lệ nợ/thu nhập tại thời điểm tính',
   score_breakdown JSON            NOT NULL
                   COMMENT '{
                     "payment": {"score":240,"max":300,"label":"Lịch sử TT"},
