@@ -107,37 +107,37 @@ function convertDebtScore(debt_payment) {
      };
 }
 function convertUtilizationScore(utilization) {
-    if (utilization > 90) {
+    if (utilization > 90) { // U > 90
         return {
             score: 10, 
             recommendation: "Ưu tiên kiểm soát dư nợ tín dụng và hạn chế phát sinh thêm chi tiêu không cần thiết.",
             priority: "HIGH"
         };
-    } else if (utilization > 70) {
+    } else if (utilization > 70) { // 70 < U <= 90 
         return { 
             score: 30, 
             recommendation: "Rà soát các khoản chi tiêu bằng tín dụng và cân nhắc giảm dư nợ hiện tại. ",
             priority: "HIGH" 
         };
-    } else if (utilization > 50) {
+    } else if (utilization > 50) { // 50 < U <= 70 
         return { 
             score: 50, 
             recommendation: "Điều chỉnh ngân sách và có kế hoạch giảm dần mức sử dụng hạn mức.",
             priority: "MEDIUM" 
         };
-    } else if (utilization > 30) {
+    } else if (utilization > 30) { // 30 < U <= 50 
         return { 
             score: 75, 
             recommendation: "Theo dõi dư nợ và hạn chế sử dụng thêm hạn mức nếu không cần thiết. ",
             priority: "MEDIUM" 
         };
-    } else if (utilization > 10) {
+    } else if (utilization > 10) { // 10 < U <= 30 
         return { 
             score: 90, 
             recommendation: "Duy trì mức sử dụng tín dụng hợp lý và theo dõi dư nợ định kỳ.",
             priority: "LOW" 
         };
-    } else if (utilization <= 10) {
+    } else if (utilization <= 10) { // U <= 10
         return { 
             score: 100, 
             recommendation: "Tiếp tục duy trì mức sử dụng hạn mức hiện tại để giữ mức điểm cao. ",
@@ -153,31 +153,31 @@ function convertUtilizationScore(utilization) {
 function convertAgeScore(age) {
     if (age <= 1) {
         return {
-            score: 10, 
+            score: 50, 
             recommendation: "Lịch sử tín dụng còn ngắn. Hãy duy trì các tài khoản hiện có một cách có trách nhiệm và thanh toán đúng hạn. ",
             priority: "LOW"
         };
     } else if (age <= 3) {
         return { 
-            score: 30, 
+            score: 60, 
             recommendation: "Tiếp tục xây dựng lịch sử tín dụng ổn định và tránh phát sinh các tài khoản không cần thiết. ",
             priority: "LOW" 
         };
     } else if (age <= 5) {
         return { 
-            score: 50, 
+            score: 75, 
             recommendation: "Duy trì các tài khoản hiện tại và theo dõi lịch sử thanh toán thường xuyên. ",
             priority: "LOW" 
         };
     } else if (age <= 7) {
         return { 
-            score: 75, 
+            score: 90, 
             recommendation: "Tiếp tục duy trì lịch sử tín dụng ổn định.",
             priority: "LOW" 
         };
     } else if (age > 7) {
         return { 
-            score: 90, 
+            score: 100, 
             recommendation: "Lịch sử tín dụng đã được duy trì trong thời gian dài. Tiếp tục quản lý các tài khoản hiện có hợp lý. ",
             priority: "LOW" 
         };
